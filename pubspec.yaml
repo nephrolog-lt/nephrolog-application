@@ -37,7 +37,7 @@ dependencies:
   url_launcher: ^5.7.10
 
   async: ^2.4.2
-  stream_transform: ^1.2.0
+  stream_transform: ^2.0.0
   collection: ^1.14.13
 
   table_calendar: ^2.3.3
