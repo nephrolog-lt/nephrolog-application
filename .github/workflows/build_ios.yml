@@ -25,7 +25,7 @@ jobs:
         with:
           ruby-version: '2.7'
 
-      - uses: maierj/fastlane-action@v2.0.0
+      - uses: maierj/fastlane-action@v2.0.1
         with:
           lane: 'prepare_ci'
           subdirectory: 'ios'

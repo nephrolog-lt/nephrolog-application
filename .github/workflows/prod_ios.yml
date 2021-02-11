@@ -50,7 +50,7 @@ jobs:
 
       - run: flutter build ios --release --no-codesign --build-number ${{ env.BUILD_NUMBER }} --build-name ${{ env.RELEASE_VERSION }}
 
-      - uses: maierj/fastlane-action@v2.0.0
+      - uses: maierj/fastlane-action@v2.0.1
         with:
           lane: 'release'
           subdirectory: 'ios'
