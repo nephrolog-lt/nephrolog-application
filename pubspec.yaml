@@ -40,7 +40,7 @@ dependencies:
   collection: ^1.14.13
   collection_ext: ^0.3.0
 
-  syncfusion_flutter_charts: 18.4.43+2
+  syncfusion_flutter_charts: 18.4.44
   table_calendar: ^2.3.3
 
   smooth_page_indicator: ^0.2.0
