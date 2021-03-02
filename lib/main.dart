@@ -16,7 +16,10 @@ Future<void> main() async {
 
   await Firebase.initializeApp();
 
-  await TimeMachine.initialize({'rootBundle': rootBundle});
+  await TimeMachine.initialize({
+    'rootBundle': rootBundle,
+    'timeZone': 'Europe/Vilnius',
+  });
 
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((record) {
