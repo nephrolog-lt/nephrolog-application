@@ -99,7 +99,7 @@ class DateTimeNumericChart extends StatelessWidget {
 
   DateTimeAxis _getDateTimeAxis() {
     var adjustedDateFrom = from.atMidnight();
-    final adjustedDateTo = from.at(LocalTime.noon);
+    final adjustedDateTo = to.at(LocalTime.noon);
 
     double interval;
     var intervalType = DateTimeIntervalType.auto;
