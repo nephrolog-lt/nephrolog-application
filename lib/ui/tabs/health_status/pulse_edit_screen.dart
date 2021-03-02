@@ -9,6 +9,7 @@ import 'package:nephrogo/ui/general/dialogs.dart';
 import 'package:nephrogo/utils/form_utils.dart';
 import 'package:nephrogo_api_client/model/pulse.dart';
 import 'package:nephrogo_api_client/model/pulse_request.dart';
+import 'package:time_machine/time_machine.dart';
 
 class PulseEditScreenArguments {
   final Pulse pulse;
@@ -67,33 +68,32 @@ class _PulseEditScreenState extends State<PulseEditScreen> {
                   children: [
                     Flexible(
                       child: AppDatePickerFormField(
-                        initialDate: _requestBuilder.measuredAt.toLocal(),
-                        selectedDate: _requestBuilder.measuredAt.toLocal(),
+                        initialDate: _requestBuilder.measuredAt.calendarDate,
+                        selectedDate: _requestBuilder.measuredAt.calendarDate,
                         firstDate: Constants.earliestDate,
-                        lastDate: DateTime.now(),
+                        lastDate: LocalDate.today(),
                         validator: _formValidators.nonNull(),
-                        onDateChanged: (dt) {
+                        onDateChanged: (date) {
                           _requestBuilder.measuredAt = _requestBuilder
                               .measuredAt
-                              .appliedDate(dt.toDate())
-                              .toUtc();
+                              .adjustDate((_) => date);
                         },
                         labelText: appLocalizations.date,
                       ),
                     ),
                     Flexible(
                       child: AppTimePickerFormField(
-                        initialTime: TimeOfDay.fromDateTime(
-                          _requestBuilder.measuredAt.toLocal(),
-                        ),
+                        initialTime: _requestBuilder.measuredAt.clockTime,
                         labelText: appLocalizations.mealCreationTime,
-                        onTimeChanged: (t) {
-                          _requestBuilder.measuredAt =
-                              _requestBuilder.measuredAt.applied(t).toUtc();
+                        onTimeChanged: (time) {
+                          _requestBuilder.measuredAt = _requestBuilder
+                              .measuredAt
+                              .adjustTime((_) => time);
                         },
-                        onTimeSaved: (t) {
-                          _requestBuilder.measuredAt =
-                              _requestBuilder.measuredAt.applied(t).toUtc();
+                        onTimeSaved: (time) {
+                          _requestBuilder.measuredAt = _requestBuilder
+                              .measuredAt
+                              .adjustTime((_) => time);
                         },
                       ),
                     ),

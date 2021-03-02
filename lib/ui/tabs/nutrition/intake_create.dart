@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:nephrogo/api/api_service.dart';
 import 'package:nephrogo/constants.dart';
 import 'package:nephrogo/extensions/extensions.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/routes.dart';
 import 'package:nephrogo/ui/forms/form_validators.dart';
 import 'package:nephrogo/ui/forms/forms.dart';
@@ -17,6 +16,7 @@ import 'package:nephrogo_api_client/model/intake.dart';
 import 'package:nephrogo_api_client/model/intake_request.dart';
 import 'package:nephrogo_api_client/model/meal_type_enum.dart';
 import 'package:nephrogo_api_client/model/product.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'nutrition_components.dart';
 
@@ -24,7 +24,7 @@ class IntakeCreateScreenArguments extends Equatable {
   final DailyNutrientNormsWithTotals dailyNutrientNormsAndTotals;
   final Product product;
   final Intake intake;
-  final Date initialDate;
+  final LocalDate initialDate;
   final MealTypeEnum mealType;
 
   const IntakeCreateScreenArguments({
@@ -44,7 +44,7 @@ class IntakeCreateScreen extends StatefulWidget {
   final DailyNutrientNormsWithTotals dailyNutrientNormsAndTotals;
   final Intake intake;
   final Product initialProduct;
-  final Date initialDate;
+  final LocalDate initialDate;
   final MealTypeEnum mealType;
 
   const IntakeCreateScreen({
@@ -79,7 +79,7 @@ class _IntakeCreateScreenState extends State<IntakeCreateScreen> {
 
   List<_IntakeSectionOption> _intakeSectionsOptions;
 
-  DateTime _consumedAt;
+  LocalDateTime _consumedAt;
 
   MealTypeEnum _mealType;
 
@@ -90,20 +90,15 @@ class _IntakeCreateScreenState extends State<IntakeCreateScreen> {
   void initState() {
     super.initState();
 
-    _consumedAt = DateTime.now();
+    _consumedAt = LocalDateTime.now();
     _mealType = widget.mealType;
 
     if (widget.initialDate != null) {
-      _consumedAt = _consumedAt.copyWith(
-        year: widget.initialDate.year,
-        month: widget.initialDate.month,
-        day: widget.initialDate.day,
-      );
+      _consumedAt = _consumedAt.adjustDate((_) => widget.initialDate);
     }
 
-    final fakedIntake = widget.initialProduct.fakeIntake(
-      consumedAt: _consumedAt,
-    );
+    final fakedIntake = widget.initialProduct
+        .fakeIntake(consumedAt: _consumedAt, mealType: _mealType);
 
     _intakeSectionsOptions = [_IntakeSectionOption(fakedIntake, FocusNode())];
   }
@@ -124,7 +119,7 @@ class _IntakeCreateScreenState extends State<IntakeCreateScreen> {
 
     if (product != null) {
       final fakedIntake = product.fakeIntake(
-        consumedAt: _consumedAt.toLocal(),
+        consumedAt: _consumedAt,
         mealType: _mealType,
       );
 
@@ -142,7 +137,9 @@ class _IntakeCreateScreenState extends State<IntakeCreateScreen> {
   @override
   Widget build(BuildContext context) {
     final formValidators = FormValidators(context);
-    final title = _titleDateFormat.format(_consumedAt).capitalizeFirst();
+    final title = _titleDateFormat
+        .format(_consumedAt.toDateTimeLocal())
+        .capitalizeFirst();
 
     return Scaffold(
       appBar: AppBar(
@@ -193,23 +190,16 @@ class _IntakeCreateScreenState extends State<IntakeCreateScreen> {
               BasicSection(
                 children: [
                   AppDatePickerFormField(
-                    initialDate: _consumedAt,
-                    selectedDate: _consumedAt,
+                    initialDate: _consumedAt.calendarDate,
+                    selectedDate: _consumedAt.calendarDate,
                     firstDate: Constants.earliestDate,
-                    lastDate: DateTime.now(),
+                    lastDate: LocalDate.today(),
                     validator: formValidators.nonNull(),
                     dateFormat: _calendarDateFormat,
                     prefixIcon: const Icon(Icons.calendar_today),
-                    onDateChanged: (dt) {
-                      final ldt = dt.toLocal();
+                    onDateChanged: (date) {
                       setState(() {
-                        _consumedAt = DateTime(
-                          ldt.year,
-                          ldt.month,
-                          ldt.day,
-                          _consumedAt.hour,
-                          _consumedAt.minute,
-                        );
+                        _consumedAt = _consumedAt.adjustDate((_) => date);
                       });
                     },
                     labelText: appLocalizations.date,
@@ -262,7 +252,7 @@ class _IntakeCreateScreenState extends State<IntakeCreateScreen> {
       builder.productId = fakedIntake.product.id;
       builder.amountG = fakedIntake.amountG;
       builder.amountMl = fakedIntake.amountMl;
-      builder.consumedAt = _consumedAt.toUtc();
+      builder.consumedAt = _consumedAt.withOffset(Offset.zero);
       builder.mealType = _mealType;
 
       yield builder.build();
@@ -336,7 +326,7 @@ class _IntakeEditSectionState extends State<_IntakeEditSection> {
 
   bool get isAmountInMilliliters => intake.product.densityGMl != null;
 
-  DateTime get _consumedAt => intake.consumedAt;
+  LocalDateTime get _consumedAt => intake.consumedAt.localDateTime;
 
   Product get _product => intake.product;
 
@@ -395,6 +385,7 @@ class _IntakeEditSectionState extends State<_IntakeEditSection> {
           widget.dailyNutrientNormsAndTotals,
           initiallyExpanded: widget.initiallyExpanded,
           showDate: false,
+          allowLongClick: false,
         ),
       ],
     );
@@ -414,6 +405,7 @@ class _IntakeEditSectionState extends State<_IntakeEditSection> {
 
     return _product.fakeIntake(
       consumedAt: _consumedAt,
+      mealType: widget.initialFakedIntake.mealType,
       amountG: amountG,
       amountMl: amountMl,
     );

@@ -5,7 +5,6 @@ import 'package:nephrogo/api/api_service.dart';
 import 'package:nephrogo/constants.dart';
 import 'package:nephrogo/extensions/extensions.dart';
 import 'package:nephrogo/models/contract.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/routes.dart';
 import 'package:nephrogo/ui/charts/daily_meal_type_consumption_column_series.dart';
 import 'package:nephrogo/ui/charts/daily_norms_bar_chart.dart';
@@ -19,18 +18,19 @@ import 'package:nephrogo_api_client/model/daily_intakes_report_response.dart';
 import 'package:nephrogo_api_client/model/daily_nutrient_norms_with_totals.dart';
 import 'package:nephrogo_api_client/model/intake.dart';
 import 'package:nephrogo_api_client/model/meal_type_enum.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'nutrition_summary_components.dart';
 
 class NutritionDailySummaryScreenArguments {
-  final Date date;
+  final LocalDate date;
   final Nutrient nutrient;
 
   NutritionDailySummaryScreenArguments(this.date, {this.nutrient});
 }
 
 class NutritionDailySummaryScreen extends StatefulWidget {
-  final Date date;
+  final LocalDate date;
   final Nutrient nutrient;
 
   const NutritionDailySummaryScreen(
@@ -49,7 +49,7 @@ class _NutritionDailySummaryScreenState
     extends State<NutritionDailySummaryScreen> {
   final _apiService = ApiService();
 
-  Date date;
+  LocalDate date;
 
   @override
   void initState() {
@@ -163,7 +163,7 @@ class _NutritionDailySummaryList extends StatelessWidget {
         return _NutritionDailySummaryListNutritionSection(
           mealType: group.item1,
           intakes: group.item2,
-          date: dailyIntakesReport.date.toDate(),
+          date: dailyIntakesReport.date.calendarDate,
           norms: norms,
         );
       },
@@ -175,7 +175,7 @@ class _NutritionDailySummaryListNutritionSection extends StatelessWidget {
   final MealTypeEnum mealType;
   final List<Intake> intakes;
   final DailyNutrientNormsWithTotals norms;
-  final Date date;
+  final LocalDate date;
 
   const _NutritionDailySummaryListNutritionSection({
     Key key,
@@ -295,7 +295,7 @@ class _DailyNutritionNutrientSection extends StatelessWidget {
                 arguments: ProductSearchScreenArguments(
                   ProductSearchType.choose,
                   mealType,
-                  date: dailyIntakesReport.date.toDate(),
+                  date: dailyIntakesReport.date.calendarDate,
                 ),
               ),
               child: Text(context.appLocalizations.create.toUpperCase()),

@@ -5,12 +5,13 @@ import 'package:nephrogo_api_client/model/blood_pressure.dart';
 import 'package:nephrogo_api_client/model/daily_health_status.dart';
 import 'package:nephrogo_api_client/model/pulse.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'date_time_numeric_chart.dart';
 
 class HealthIndicatorBarChart extends StatelessWidget {
-  final DateTime from;
-  final DateTime to;
+  final LocalDate from;
+  final LocalDate to;
   final HealthIndicator indicator;
   final List<DailyHealthStatus> dailyHealthStatuses;
 
@@ -53,20 +54,20 @@ class HealthIndicatorBarChart extends StatelessWidget {
   List<XyDataSeries> _getBloodPressureSeries(BuildContext context) {
     final sortedBloodPressures = dailyHealthStatuses
         .expand((e) => e.bloodPressures)
-        .sortedBy((e) => e.measuredAt)
+        .sortedBy((e) => e.measuredAt.localDateTime)
         .toList();
 
     return [
       LineSeries<BloodPressure, DateTime>(
         dataSource: sortedBloodPressures,
-        xValueMapper: (c, _) => c.measuredAt.toLocal(),
+        xValueMapper: (c, _) => c.measuredAt.localDateTime.toDateTimeLocal(),
         yValueMapper: (c, _) => c.systolicBloodPressure,
         markerSettings: MarkerSettings(isVisible: true),
         name: context.appLocalizations.healthStatusCreationSystolic,
       ),
       LineSeries<BloodPressure, DateTime>(
         dataSource: sortedBloodPressures,
-        xValueMapper: (c, _) => c.measuredAt.toLocal(),
+        xValueMapper: (c, _) => c.measuredAt.localDateTime.toDateTimeLocal(),
         yValueMapper: (c, _) => c.diastolicBloodPressure,
         markerSettings: MarkerSettings(isVisible: true),
         name: context.appLocalizations.healthStatusCreationDiastolic,
@@ -77,13 +78,13 @@ class HealthIndicatorBarChart extends StatelessWidget {
   List<XyDataSeries> _getPulseSeries(BuildContext context) {
     final sortedPulses = dailyHealthStatuses
         .expand((s) => s.pulses)
-        .sortedBy((e) => e.measuredAt)
+        .sortedBy((e) => e.measuredAt.localDateTime)
         .toList();
 
     return [
       LineSeries<Pulse, DateTime>(
         dataSource: sortedPulses,
-        xValueMapper: (c, _) => c.measuredAt.toLocal(),
+        xValueMapper: (c, _) => c.measuredAt.localDateTime.toDateTimeLocal(),
         yValueMapper: (c, _) => c.pulse,
         name: context.appLocalizations.pulse,
         markerSettings: MarkerSettings(isVisible: true),
@@ -94,8 +95,9 @@ class HealthIndicatorBarChart extends StatelessWidget {
   List<XyDataSeries> _getDefaultLineSeries(BuildContext context) {
     return [
       LineSeries<DailyHealthStatus, DateTime>(
-        dataSource: dailyHealthStatuses.sortedBy((e) => e.date).toList(),
-        xValueMapper: (s, _) => s.date.toDate(),
+        dataSource:
+            dailyHealthStatuses.sortedBy((e) => e.date.calendarDate).toList(),
+        xValueMapper: (s, _) => s.date.calendarDate.toDateTimeUnspecified(),
         yValueMapper: (s, _) => s.getHealthIndicatorValue(indicator),
         dataLabelMapper: (s, _) =>
             s.getHealthIndicatorFormatted(indicator, context.appLocalizations),

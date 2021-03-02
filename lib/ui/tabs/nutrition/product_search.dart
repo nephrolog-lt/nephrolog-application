@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:nephrogo/api/api_service.dart';
 import 'package:nephrogo/constants.dart';
 import 'package:nephrogo/l10n/localizations.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/routes.dart';
 import 'package:nephrogo/ui/general/app_steam_builder.dart';
 import 'package:nephrogo/ui/general/components.dart';
@@ -14,6 +13,7 @@ import 'package:nephrogo_api_client/model/daily_nutrient_norms_with_totals.dart'
 import 'package:nephrogo_api_client/model/meal_type_enum.dart';
 import 'package:nephrogo_api_client/model/product.dart';
 import 'package:nephrogo_api_client/model/product_search_response.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'intake_create.dart';
 
@@ -25,7 +25,7 @@ enum ProductSearchType {
 class ProductSearchScreenArguments {
   final ProductSearchType searchType;
   final List<int> excludeProductsIds;
-  final Date date;
+  final LocalDate date;
   final MealTypeEnum mealType;
 
   ProductSearchScreenArguments(
@@ -47,7 +47,7 @@ class _Query {
 class ProductSearchScreen extends StatefulWidget {
   final ProductSearchType searchType;
   final List<int> excludeProductsIds;
-  final Date date;
+  final LocalDate date;
   final MealTypeEnum mealType;
 
   const ProductSearchScreen({

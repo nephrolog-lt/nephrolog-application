@@ -3,12 +3,12 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:nephrogo/extensions/extensions.dart';
 import 'package:nephrogo/l10n/localizations.dart';
 import 'package:nephrogo/models/contract.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/routes.dart';
 import 'package:nephrogo/ui/charts/health_indicator_bar_chart.dart';
 import 'package:nephrogo/ui/general/components.dart';
 import 'package:nephrogo/ui/tabs/health_status/blood_pressure_and_pulse_creation_screen.dart';
 import 'package:nephrogo_api_client/model/daily_health_status.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'health_status_creation_screen.dart';
 import 'health_status_screen.dart';
@@ -90,10 +90,10 @@ class IndicatorChartSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final today = Date.today();
+    final today = LocalDate.today();
 
     final todayHealthStatus = dailyHealthStatuses
-        .where((e) => Date.from(e.date) == today)
+        .where((e) => e.date.calendarDate == today)
         .firstOrNull();
 
     final todayConsumption = todayHealthStatus?.getHealthIndicatorFormatted(
@@ -124,7 +124,7 @@ class IndicatorChartSection extends StatelessWidget {
             child: HealthIndicatorBarChart(
               dailyHealthStatuses: dailyHealthStatuses,
               indicator: indicator,
-              from: today.subtract(const Duration(days: 6)),
+              from: today.subtractDays(6),
               to: today,
             ),
           ),

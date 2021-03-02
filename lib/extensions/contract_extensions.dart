@@ -4,9 +4,9 @@ import 'package:collection_ext/iterables.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nephrogo/extensions/collection_extensions.dart';
+import 'package:nephrogo/extensions/date_extensions.dart';
 import 'package:nephrogo/l10n/localizations.dart';
 import 'package:nephrogo/models/contract.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo_api_client/model/appetite_enum.dart';
 import 'package:nephrogo_api_client/model/automatic_peritoneal_dialysis.dart';
 import 'package:nephrogo_api_client/model/automatic_peritoneal_dialysis_request.dart';
@@ -34,6 +34,7 @@ import 'package:nephrogo_api_client/model/swelling_difficulty_enum.dart';
 import 'package:nephrogo_api_client/model/swelling_enum.dart';
 import 'package:nephrogo_api_client/model/swelling_request.dart';
 import 'package:nephrogo_api_client/model/well_feeling_enum.dart';
+import 'package:time_machine/time_machine.dart';
 import 'package:tuple/tuple.dart';
 
 final _numberFormatter = NumberFormat.decimalPattern();
@@ -95,16 +96,17 @@ extension ProductExtensions on Product {
   // This is used for generating intakes required to show nutrient amounts
   // after searching for a product
   Intake fakeIntake({
-    @required DateTime consumedAt,
+    @required LocalDateTime consumedAt,
+    @required MealTypeEnum mealType,
     int amountG = 0,
     int amountMl,
-    MealTypeEnum mealType,
   }) {
     assert(amountG != null);
 
     final builder = IntakeBuilder();
 
-    builder.consumedAt = consumedAt;
+    builder.id = 0;
+    builder.consumedAt = consumedAt.withOffset(Offset.zero);
 
     builder.amountG = amountG;
 
@@ -187,7 +189,8 @@ extension DailyIntakesReportExtensions on DailyIntakesReport {
 
   Iterable<Tuple2<MealTypeEnum, List<Intake>>>
       getIntakesGroupedByMealType() sync* {
-    final sortedIntakes = intakes.sortedBy((i) => i.consumedAt, reverse: true);
+    final sortedIntakes =
+        intakes.sortedBy((i) => i.consumedAt.localDateTime, reverse: true);
     final groups = sortedIntakes.groupBy((intake) => intake.mealType);
 
     final mealTypes = [
@@ -230,7 +233,7 @@ extension DailyIntakesReportExtensions on DailyIntakesReport {
             .sumBy((_, e) => e.getNutrientAmount(nutrient));
 
         yield DailyMealTypeNutrientConsumption(
-          date: Date.from(date),
+          date: date.calendarDate,
           nutrient: nutrient,
           mealType: mealType,
           drinksTotal: drinksTotal,
@@ -239,7 +242,7 @@ extension DailyIntakesReportExtensions on DailyIntakesReport {
         );
       } else if (includeEmpty && mealType != MealTypeEnum.unknown) {
         yield DailyMealTypeNutrientConsumption(
-          date: Date.from(date),
+          date: date.calendarDate,
           nutrient: nutrient,
           mealType: mealType,
           drinksTotal: 0,
@@ -534,7 +537,7 @@ extension BloodPressureExtensions on BloodPressure {
 
     builder.diastolicBloodPressure = diastolicBloodPressure;
     builder.systolicBloodPressure = systolicBloodPressure;
-    builder.measuredAt = measuredAt.toUtc();
+    builder.measuredAt = measuredAt;
 
     return builder;
   }
@@ -548,8 +551,10 @@ extension BloodPressureExtensions on BloodPressure {
   }
 
   String formatAmountWithoutDimensionWithTime(BuildContext context) {
-    final time = TimeOfDay.fromDateTime(measuredAt.toLocal()).format(context);
-    return '$formattedAmountWithoutDimension ($time)';
+    final formattedTime =
+        measuredAt.localDateTime.clockTime.formatHoursAndMinutes();
+
+    return '$formattedAmountWithoutDimension ($formattedTime)';
   }
 }
 
@@ -558,7 +563,7 @@ extension PulseExtensions on Pulse {
     final builder = PulseRequestBuilder();
 
     builder.pulse = pulse;
-    builder.measuredAt = measuredAt.toUtc();
+    builder.measuredAt = measuredAt;
 
     return builder;
   }
@@ -568,7 +573,8 @@ extension PulseExtensions on Pulse {
   }
 
   String formatAmountWithoutDimensionWithTime(BuildContext context) {
-    final time = TimeOfDay.fromDateTime(measuredAt.toLocal()).format(context);
+    final time = measuredAt.localDateTime.clockTime.formatHoursAndMinutes();
+
     return '$pulse ($time)';
   }
 }
@@ -648,10 +654,10 @@ extension DailyHealthStatusExtensions on DailyHealthStatus {
     switch (indicator) {
       case HealthIndicator.bloodPressure:
         final latestBloodPressure =
-            bloodPressures.maxBy((_, p) => p.measuredAt);
+            bloodPressures.maxBy((_, p) => p.measuredAt.localDateTime);
         return '${latestBloodPressure.systolicBloodPressure} / ${latestBloodPressure.diastolicBloodPressure} mmHg';
       case HealthIndicator.pulse:
-        final latestPulse = pulses.maxBy((_, p) => p.measuredAt);
+        final latestPulse = pulses.maxBy((_, p) => p.measuredAt.localDateTime);
         return '${latestPulse.pulse} ${appLocalizations.pulseDimension}';
       case HealthIndicator.weight:
         return '$weightKg kg';
@@ -761,7 +767,7 @@ extension DailyHealthStatusExtensions on DailyHealthStatus {
         throw ArgumentError(
             "Unable to get blood pressure indicator value. Please use different method");
       case HealthIndicator.pulse:
-        return pulses.maxBy((_, p) => p.measuredAt).pulse;
+        return pulses.maxBy((_, p) => p.measuredAt.localDateTime).pulse;
       case HealthIndicator.weight:
         return weightKg;
       case HealthIndicator.glucose:

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:nephrogo/extensions/extensions.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/ui/charts/numeric_chart.dart';
 import 'package:nephrogo_api_client/model/manual_peritoneal_dialysis.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:time_machine/time_machine.dart';
 
 class ManualPeritonealDialysisDayBalanceChart extends StatelessWidget {
-  final Date date;
+  final LocalDate date;
   final Iterable<ManualPeritonealDialysis> manualPeritonealDialysis;
 
   const ManualPeritonealDialysisDayBalanceChart({
@@ -27,13 +27,15 @@ class ManualPeritonealDialysisDayBalanceChart extends StatelessWidget {
   }
 
   Iterable<XyDataSeries> _getColumnSeries(BuildContext context) sync* {
-    final dialysis =
-        manualPeritonealDialysis.sortedBy((e) => e.startedAt).toList();
+    final dialysis = manualPeritonealDialysis
+        .sortedBy((e) => e.startedAt.localDateTime)
+        .toList();
 
     yield BarSeries<ManualPeritonealDialysis, String>(
       dataSource: dialysis,
-      xValueMapper: (d, _) =>
-          TimeOfDay.fromDateTime(d.startedAt.toLocal()).format(context),
+      xValueMapper: (d, _) {
+        return d.startedAt.localDateTime.clockTime.formatHoursAndMinutes();
+      },
       yValueMapper: (d, i) => d.balance,
       dataLabelSettings: DataLabelSettings(
         isVisible: true,

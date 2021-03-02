@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:nephrogo/api/api_service.dart';
 import 'package:nephrogo/constants.dart';
 import 'package:nephrogo/extensions/extensions.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/routes.dart';
 import 'package:nephrogo/ui/charts/manual_peritoneal_dialysis_day_balance_chart.dart';
 import 'package:nephrogo/ui/charts/manual_peritoneal_dialysis_total_balance_chart.dart';
@@ -19,18 +18,19 @@ import 'package:nephrogo_api_client/model/daily_health_status.dart';
 import 'package:nephrogo_api_client/model/dialysate_color_enum.dart';
 import 'package:nephrogo_api_client/model/health_status_weekly_screen_response.dart';
 import 'package:nephrogo_api_client/model/manual_peritoneal_dialysis.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'excel/manual_peritoneal_dialysis_excel_generator.dart';
 
 class ManualPeritonealDialysisScreenArguments {
-  final Date initialDate;
+  final LocalDate initialDate;
 
   ManualPeritonealDialysisScreenArguments({@required this.initialDate});
 }
 
 class ManualPeritonealDialysisScreen extends StatelessWidget {
   final _apiService = ApiService();
-  final Date initialDate;
+  final LocalDate initialDate;
 
   ManualPeritonealDialysisScreen({Key key, @required this.initialDate})
       : assert(initialDate != null),
@@ -79,7 +79,7 @@ class ManualPeritonealDialysisScreen extends StatelessWidget {
   }
 
   Future<void> _downloadAndExportDialysisInternal(BuildContext context) async {
-    final today = Date.today();
+    final today = LocalDate.today();
     final dailyHealthStatusesResponse = await _apiService.getHealthStatuses(
       Constants.earliestDate,
       today,
@@ -121,7 +121,7 @@ class ManualPeritonealDialysisScreen extends StatelessWidget {
 class _ManualPeritonealDialysisDialysisList extends StatelessWidget {
   final ApiService _apiService = ApiService();
   final PeriodPagerType pagerType;
-  final Date initialDate;
+  final LocalDate initialDate;
 
   _ManualPeritonealDialysisDialysisList({
     Key key,
@@ -139,13 +139,14 @@ class _ManualPeritonealDialysisDialysisList extends StatelessWidget {
     );
   }
 
-  Widget _bodyBuilder(BuildContext context, Widget header, Date from, Date to) {
+  Widget _bodyBuilder(
+      BuildContext context, Widget header, LocalDate from, LocalDate to) {
     return AppStreamBuilder<HealthStatusWeeklyScreenResponse>(
       stream: _apiService.getHealthStatusesStream(from, to),
       builder: (context, data) {
         final sortedReports = data.dailyHealthStatuses
             .where((s) => s.manualPeritonealDialysis.isNotEmpty)
-            .sortedBy((e) => e.date, reverse: true)
+            .sortedBy((e) => e.date.calendarDate, reverse: true)
             .toList();
 
         if (sortedReports.isEmpty) {
@@ -161,6 +162,7 @@ class _ManualPeritonealDialysisDialysisList extends StatelessWidget {
         }
 
         return ListView.builder(
+          padding: const EdgeInsets.only(bottom: 72),
           itemBuilder: (context, index) {
             if (index == 0) {
               return DateSwitcherHeaderSection(
@@ -186,13 +188,13 @@ class _ManualPeritonealDialysisDialysisList extends StatelessWidget {
 
   Widget _getGraph(
     Iterable<DailyHealthStatus> dailyHealthStatus,
-    Date from,
-    Date to,
+    LocalDate from,
+    LocalDate to,
   ) {
     if (pagerType == PeriodPagerType.daily) {
       final dialysis = dailyHealthStatus
           .expand((e) => e.manualPeritonealDialysis)
-          .sortedBy((e) => e.startedAt, reverse: true)
+          .sortedBy((e) => e.startedAt.localDateTime, reverse: true)
           .toList();
 
       return ManualPeritonealDialysisDayBalanceChart(
@@ -222,10 +224,12 @@ class ManualPeritonealDialysisReportSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sortedDialysis = dailyHealthStatus.manualPeritonealDialysis
-        .sortedBy((d) => d.startedAt, reverse: true);
+        .sortedBy((d) => d.startedAt.localDateTime, reverse: true);
 
     return LargeSection(
-      title: Text(_dateFormat.format(dailyHealthStatus.date).capitalizeFirst()),
+      title: Text(_dateFormat
+          .format(dailyHealthStatus.date.calendarDate.toDateTimeUnspecified())
+          .capitalizeFirst()),
       subtitle: Text(
         '${context.appLocalizations.dailyBalance}: '
         '${dailyHealthStatus.totalManualPeritonealDialysisBalanceFormatted}',
@@ -256,7 +260,7 @@ class ManualPeritonealDialysisTile extends StatelessWidget {
         child: _getIcon(),
       ),
       title: Text(_dateTimeFormat
-          .format(dialysis.startedAt.toLocal())
+          .format(dialysis.startedAt.localDateTime.toDateTimeLocal())
           .capitalizeFirst()),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

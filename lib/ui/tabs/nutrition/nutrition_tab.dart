@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:nephrogo/api/api_service.dart';
 import 'package:nephrogo/extensions/extensions.dart';
 import 'package:nephrogo/l10n/localizations.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/routes.dart';
 import 'package:nephrogo/ui/charts/daily_norms_bar_chart.dart';
 import 'package:nephrogo/ui/general/app_steam_builder.dart';
@@ -14,6 +13,7 @@ import 'package:nephrogo_api_client/model/daily_nutrient_norms_with_totals.dart'
 import 'package:nephrogo_api_client/model/intake.dart';
 import 'package:nephrogo_api_client/model/nutrition_screen_v2_response.dart';
 import 'package:nephrogo_api_client/model/nutrition_summary_statistics.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'nutrition_calendar.dart';
 import 'nutrition_components.dart';
@@ -71,7 +71,7 @@ class NutritionTab extends StatelessWidget {
                 leading: OutlinedButton(
                   onPressed: () => _openNutritionDailySummary(
                     context,
-                    latestIntakes.first.consumedAt.toDate(),
+                    latestIntakes.first.consumedAt.calendarDate,
                   ),
                   child: Text(appLocalizations.more.toUpperCase()),
                 ),
@@ -106,7 +106,7 @@ class NutritionTab extends StatelessWidget {
 
   Future _openNutritionDailySummary(
     BuildContext context,
-    Date date,
+    LocalDate date,
   ) {
     return Navigator.pushNamed(
       context,

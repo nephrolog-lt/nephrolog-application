@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
-import 'package:built_value/iso_8601_date_time_serializer.dart';
-import 'package:built_value/serializer.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_brotli_transformer/dio_brotli_transformer.dart';
 import 'package:dio_firebase_performance/dio_firebase_performance.dart';
@@ -10,7 +8,6 @@ import 'package:dio_http2_adapter/dio_http2_adapter.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, required;
 import 'package:logging/logging.dart';
 import 'package:nephrogo/authentication/authentication_provider.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo_api_client/api.dart';
 import 'package:nephrogo_api_client/api/general_recommendations_api.dart';
 import 'package:nephrogo_api_client/api/health_status_api.dart';
@@ -45,8 +42,8 @@ import 'package:nephrogo_api_client/model/user_app_review.dart';
 import 'package:nephrogo_api_client/model/user_profile.dart';
 import 'package:nephrogo_api_client/model/user_profile_request.dart';
 import 'package:nephrogo_api_client/model/user_request.dart';
-import 'package:nephrogo_api_client/serializers.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:time_machine/time_machine.dart';
 
 enum _AppStateChangeEvent { healthStatus, nutrition }
 
@@ -104,7 +101,6 @@ class ApiService {
     return NephrogoApiClient(
       dio: dio,
       basePathOverride: _baseApiUrl,
-      serializers: _buildDioSerializers(),
       interceptors: _buildDioInterceptors(dio),
     );
   }
@@ -124,13 +120,6 @@ class ApiService {
     }
 
     return interceptors;
-  }
-
-  Serializers _buildDioSerializers() {
-    final apiSerializersBuilder = standardSerializers.toBuilder()
-      ..add(DateAndDateTimeUtcSerializer());
-
-    return apiSerializersBuilder.build();
   }
 
   void _postAppStateChangeEvent(_AppStateChangeEvent event) {
@@ -154,25 +143,28 @@ class ApiService {
   }
 
   Future<DailyIntakesReportsResponse> getLightDailyIntakeReports(
-    Date from,
-    Date to,
+    LocalDate from,
+    LocalDate to,
   ) {
     return _nutritionApi
-        .nutritionDailyReportsLightRetrieve(from: from, to: to)
+        .nutritionDailyReportsLightRetrieve(
+          from: _HackedOffsetDate(from),
+          to: _HackedOffsetDate(to),
+        )
         .then((r) => r.data);
   }
 
   Stream<DailyIntakesReportsResponse> getLightDailyIntakeReportsStream(
-    Date from,
-    Date to,
+    LocalDate from,
+    LocalDate to,
   ) {
     return _buildAppEventsStreamWithInitialEmit(_AppStateChangeEvent.nutrition)
         .asyncMap((_) => getLightDailyIntakeReports(from, to));
   }
 
-  Future<DailyIntakesReportResponse> getDailyIntakesReport(Date date) {
+  Future<DailyIntakesReportResponse> getDailyIntakesReport(LocalDate date) {
     return _nutritionApi
-        .nutritionDailyReportsRetrieve(date.toString())
+        .nutritionDailyReportsRetrieve(_HackedOffsetDate(date).toString())
         .then((r) => r.data)
         .catchError(
           (e) => null,
@@ -180,20 +172,24 @@ class ApiService {
         );
   }
 
-  Stream<DailyIntakesReportResponse> getDailyIntakesReportStream(Date date) {
+  Stream<DailyIntakesReportResponse> getDailyIntakesReportStream(
+      LocalDate date) {
     return _buildAppEventsStreamWithInitialEmit(_AppStateChangeEvent.nutrition)
         .asyncMap((_) => getDailyIntakesReport(date));
   }
 
   Future<NutrientWeeklyScreenResponse> getWeeklyDailyIntakesReport(
-      DateTime from, DateTime to) {
+      LocalDate from, LocalDate to) {
     return _nutritionApi
-        .nutritionWeeklyRetrieve(Date.from(from), Date.from(to))
+        .nutritionWeeklyRetrieve(
+          _HackedOffsetDate(from),
+          _HackedOffsetDate(to),
+        )
         .then((r) => r.data);
   }
 
   Stream<NutrientWeeklyScreenResponse> getWeeklyDailyIntakesReportStream(
-      DateTime from, DateTime to) {
+      LocalDate from, LocalDate to) {
     return _buildAppEventsStreamWithInitialEmit(_AppStateChangeEvent.nutrition)
         .asyncMap((_) => getWeeklyDailyIntakesReport(from, to));
   }
@@ -273,9 +269,9 @@ class ApiService {
     );
   }
 
-  Future<DailyHealthStatus> getDailyHealthStatus(DateTime date) {
+  Future<DailyHealthStatus> getDailyHealthStatus(LocalDate date) {
     return _healthStatusApi
-        .healthStatusRetrieve(Date.from(date))
+        .healthStatusRetrieve(_HackedOffsetDate(date))
         .then((r) => r.data)
         .catchError(
           (e) => null,
@@ -356,17 +352,20 @@ class ApiService {
   }
 
   Future<HealthStatusWeeklyScreenResponse> getHealthStatuses(
-    Date from,
-    Date to,
+    LocalDate from,
+    LocalDate to,
   ) {
     return _healthStatusApi
-        .healthStatusWeeklyRetrieve(from, to)
+        .healthStatusWeeklyRetrieve(
+          _HackedOffsetDate(from),
+          _HackedOffsetDate(to),
+        )
         .then((r) => r.data);
   }
 
   Stream<HealthStatusWeeklyScreenResponse> getHealthStatusesStream(
-    Date from,
-    Date to,
+    LocalDate from,
+    LocalDate to,
   ) {
     return _buildAppEventsStreamWithInitialEmit(
             _AppStateChangeEvent.healthStatus)
@@ -516,9 +515,12 @@ class ApiService {
   }
 
   Future<AutomaticPeritonealDialysis> updateAutomaticPeritonealDialysis(
-      Date date, AutomaticPeritonealDialysisRequest request) {
+      LocalDate date, AutomaticPeritonealDialysisRequest request) {
     return _peritonealDialysisApi
-        .peritonealDialysisAutomaticDialysisUpdate(date.toString(), request)
+        .peritonealDialysisAutomaticDialysisUpdate(
+      _HackedOffsetDate(date).toString(),
+      request,
+    )
         .then(
       (r) {
         _postAppStateChangeEvent(_AppStateChangeEvent.healthStatus);
@@ -528,9 +530,11 @@ class ApiService {
     );
   }
 
-  Future<void> deleteAutomaticPeritonealDialysis(Date date) {
+  Future<void> deleteAutomaticPeritonealDialysis(LocalDate date) {
     return _peritonealDialysisApi
-        .peritonealDialysisAutomaticDialysisDestroy(date.toString())
+        .peritonealDialysisAutomaticDialysisDestroy(
+      _HackedOffsetDate(date).toString(),
+    )
         .then(
       (r) {
         _postAppStateChangeEvent(_AppStateChangeEvent.healthStatus);
@@ -605,32 +609,11 @@ class _FirebaseAuthenticationInterceptor extends Interceptor {
   }
 }
 
-// Hack start
-class DateAndDateTimeUtcSerializer extends Iso8601DateTimeSerializer {
-  @override
-  DateTime deserialize(Serializers serializers, Object serialized,
-      {FullType specifiedType = FullType.unspecified}) {
-    final s = serialized as String;
-
-    if (s.contains('T')) {
-      return super.deserialize(serializers, serialized);
-    }
-
-    try {
-      return Date.from(Date.dateFormat.parseStrict(s));
-    } on FormatException {
-      return super.deserialize(serializers, serialized);
-    }
-  }
+class _HackedOffsetDate extends OffsetDate {
+  _HackedOffsetDate(LocalDate calendarDate) : super(calendarDate, Offset.zero);
 
   @override
-  Object serialize(Serializers serializers, DateTime dateTime,
-      {FullType specifiedType = FullType.unspecified}) {
-    if (dateTime is Date) {
-      return dateTime.toString();
-    }
-
-    return super.serialize(serializers, dateTime, specifiedType: specifiedType);
+  String toString([String patternText, Culture culture]) {
+    return super.toString('yyyy-MM-dd');
   }
 }
-// hack end

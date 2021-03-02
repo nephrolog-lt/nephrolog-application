@@ -1,4 +1,4 @@
-import 'models/date.dart';
+import 'package:time_machine/time_machine.dart';
 
 class Constants {
   Constants._();
@@ -15,5 +15,5 @@ class Constants {
       'https://www.nephrogo.com/missing-product/';
   static const appStoreId = '1549505165';
 
-  static final earliestDate = Date(2021, 1, 1);
+  static final earliestDate = LocalDate(2021, 1, 1);
 }

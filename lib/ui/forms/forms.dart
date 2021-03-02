@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:nephrogo/extensions/extensions.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'app_form_multi_select_dialog.dart';
 import 'app_form_single_select_dialog.dart';
@@ -405,18 +406,18 @@ class _AppMultipleSelectFormFieldState<T>
 }
 
 class AppDatePickerFormField extends StatefulWidget {
-  final DateTime initialDate;
-  final DateTime selectedDate;
-  final DateTime firstDate;
-  final DateTime lastDate;
+  final LocalDate initialDate;
+  final LocalDate selectedDate;
+  final LocalDate firstDate;
+  final LocalDate lastDate;
 
   final String labelText;
   final String helperText;
   final Widget icon;
   final Widget prefixIcon;
-  final FormFieldValidator<DateTime> validator;
-  final FormFieldSetter<DateTime> onDateSaved;
-  final FormFieldSetter<DateTime> onDateChanged;
+  final FormFieldValidator<LocalDate> validator;
+  final FormFieldSetter<LocalDate> onDateSaved;
+  final FormFieldSetter<LocalDate> onDateChanged;
   final DateFormat dateFormat;
   final DatePickerEntryMode initialEntryMode;
   final DatePickerMode initialDatePickerMode;
@@ -449,22 +450,22 @@ class _AppDatePickerFormFieldState extends State<AppDatePickerFormField> {
   // This is a bug with platform translation. Incorrect format is shown. Set to correct one.
   static const _fieldHintText = 'yyyy-mm-dd';
 
-  DateTime selectedDateTime;
+  LocalDate selectedDateTime;
 
   @override
   void initState() {
     super.initState();
 
-    selectedDateTime = widget.selectedDate?.toUtc();
+    selectedDateTime = widget.selectedDate;
   }
 
   @override
   Widget build(BuildContext context) {
-    return AppSelectionScreenFormField<DateTime>(
+    return AppSelectionScreenFormField<LocalDate>(
       onTap: _onTap,
       itemToStringConverter: (date) {
         return (widget.dateFormat ?? _defaultDateFormat)
-            .format(date.toLocal())
+            .format(date.toDateTimeUnspecified())
             .capitalizeFirst();
       },
       labelText: widget.labelText,
@@ -478,30 +479,32 @@ class _AppDatePickerFormFieldState extends State<AppDatePickerFormField> {
     );
   }
 
-  Future<DateTime> _onTap(BuildContext context) async {
+  Future<LocalDate> _onTap(BuildContext context) async {
     final dateTime = await showDatePicker(
       context: context,
-      firstDate: widget.firstDate.toLocal(),
-      lastDate: widget.lastDate.toLocal(),
-      initialDate: widget.initialDate.toLocal(),
+      firstDate: widget.firstDate.toDateTimeUnspecified(),
+      lastDate: widget.lastDate.toDateTimeUnspecified(),
+      initialDate: widget.initialDate.toDateTimeUnspecified(),
       initialDatePickerMode: widget.initialDatePickerMode,
       initialEntryMode: widget.initialEntryMode,
       fieldHintText: _fieldHintText,
     );
 
-    selectedDateTime = (dateTime ?? selectedDateTime)?.toUtc();
+    if (dateTime == null) {
+      return null;
+    }
 
-    return dateTime;
+    return selectedDateTime = LocalDate.dateTime(dateTime);
   }
 }
 
 class AppTimePickerFormField extends StatefulWidget {
-  final TimeOfDay initialTime;
+  final LocalTime initialTime;
   final String labelText;
   final String helperText;
   final Widget prefixIcon;
-  final FormFieldSetter<TimeOfDay> onTimeSaved;
-  final FormFieldSetter<TimeOfDay> onTimeChanged;
+  final FormFieldSetter<LocalTime> onTimeSaved;
+  final FormFieldSetter<LocalTime> onTimeChanged;
 
   const AppTimePickerFormField({
     Key key,
@@ -518,16 +521,16 @@ class AppTimePickerFormField extends StatefulWidget {
 }
 
 class _AppTimePickerFormFieldState extends State<AppTimePickerFormField> {
-  TimeOfDay _selectedTimeOfDay;
+  LocalTime _selectedTimeOfDay;
 
   @override
   Widget build(BuildContext context) {
     _selectedTimeOfDay = widget.initialTime;
 
-    return AppSelectionScreenFormField<TimeOfDay>(
+    return AppSelectionScreenFormField<LocalTime>(
       onTap: _onTap,
       itemToStringConverter: (newlySelectedTimeOfDay) {
-        return newlySelectedTimeOfDay.format(context);
+        return newlySelectedTimeOfDay.formatHoursAndMinutes();
       },
       labelText: widget.labelText,
       helperText: widget.helperText,
@@ -544,15 +547,20 @@ class _AppTimePickerFormFieldState extends State<AppTimePickerFormField> {
     }
   }
 
-  Future<TimeOfDay> _onTap(BuildContext _) async {
+  Future<LocalTime> _onTap(BuildContext _) async {
+    final localTime = _selectedTimeOfDay ?? LocalTime.currentClockTime();
+
     final timeOfDay = await showTimePicker(
       context: context,
-      initialTime: _selectedTimeOfDay ?? TimeOfDay.now(),
+      initialTime:
+          TimeOfDay(hour: localTime.hourOfDay, minute: localTime.minuteOfHour),
     );
 
-    _selectedTimeOfDay = timeOfDay ?? _selectedTimeOfDay;
+    if (timeOfDay == null) {
+      return null;
+    }
 
-    return timeOfDay;
+    return _selectedTimeOfDay = LocalTime(timeOfDay.hour, timeOfDay.minute, 0);
   }
 }
 

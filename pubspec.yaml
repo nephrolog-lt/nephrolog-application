@@ -50,6 +50,8 @@ dependencies:
 
   scrollable_positioned_list: ^0.1.9
 
+  time_machine: 0.9.15
+
   dio: ^3.0.10
   dio_http2_adapter: ^1.0.1
   dio_brotli_transformer: ^0.2.0
@@ -58,7 +60,7 @@ dependencies:
   nephrogo_api_client:
     git:
       url: https://github.com/nephrogo/nephrogo-api-dart-client.git
-      ref: release/v0.6.1
+      ref: release/v0.6.4
 
   flutter_speed_dial:
     git:
@@ -112,6 +114,9 @@ flutter:
     - assets/anonymous_avatar.jpg
     - assets/empty.png
     - assets/onboarding/
+    - packages/time_machine/data/cultures/cultures.bin
+    - packages/time_machine/data/tzdb/tzdb.bin
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

@@ -86,7 +86,7 @@ class _AutomaticPeritonealDialysisTabBody extends StatelessWidget {
   }
 
 // Widget _buildTotalBalanceSection(BuildContext context) {
-//   final today = Date.today();
+//   final today = LocalDate.today();
 //
 //   final healthStatusesWithDialysis = response.lastWeekHealthStatuses
 //       .where((s) => s.manualPeritonealDialysis.isNotEmpty)

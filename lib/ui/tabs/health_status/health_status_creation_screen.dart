@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nephrogo/api/api_service.dart';
 import 'package:nephrogo/extensions/extensions.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/ui/forms/form_validators.dart';
 import 'package:nephrogo/ui/forms/forms.dart';
 import 'package:nephrogo/ui/general/app_future_builder.dart';
@@ -17,16 +16,17 @@ import 'package:nephrogo_api_client/model/swelling_difficulty_enum.dart';
 import 'package:nephrogo_api_client/model/swelling_enum.dart';
 import 'package:nephrogo_api_client/model/swelling_request.dart';
 import 'package:nephrogo_api_client/model/well_feeling_enum.dart';
+import 'package:time_machine/time_machine.dart';
 
 class HealthStatusCreationScreenArguments {
-  final Date date;
+  final LocalDate date;
 
-  HealthStatusCreationScreenArguments({Date date})
-      : date = date ?? Date.today();
+  HealthStatusCreationScreenArguments({LocalDate date})
+      : date = date ?? LocalDate.today();
 }
 
 class HealthStatusCreationScreen extends StatefulWidget {
-  final Date date;
+  final LocalDate date;
 
   const HealthStatusCreationScreen({
     Key key,
@@ -50,7 +50,9 @@ class _HealthStatusCreationScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_dateFormat.format(widget.date).capitalizeFirst()),
+        title: Text(_dateFormat
+            .format(widget.date.toDateTimeUnspecified())
+            .capitalizeFirst()),
         actions: <Widget>[
           AppBarTextButton(
             onPressed: validateAndSave,
@@ -64,7 +66,7 @@ class _HealthStatusCreationScreenState
           _requestBuilder = healthStatus?.toRequest()?.toBuilder() ??
               DailyHealthStatusRequestBuilder();
 
-          _requestBuilder.date = widget.date;
+          _requestBuilder.date = widget.date.withOffset(Offset.zero);
 
           return _buildBody();
         },

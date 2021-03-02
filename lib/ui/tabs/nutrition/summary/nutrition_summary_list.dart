@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:nephrogo/extensions/extensions.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/ui/tabs/nutrition/nutrition_calendar.dart';
 import 'package:nephrogo/ui/tabs/nutrition/nutrition_components.dart';
 import 'package:nephrogo_api_client/model/daily_intakes_light_report.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'nutrition_summary_components.dart';
 
@@ -39,7 +39,7 @@ class NutritionMonthlyReportsListState
     _itemScrollController = ItemScrollController();
     reportsReverseSorted = widget.reports
         .sortedBy(
-          (e) => e.date,
+          (e) => e.date.calendarDate,
           reverse: true,
         )
         .toList();
@@ -74,20 +74,20 @@ class NutritionMonthlyReportsListState
   }
 
   void _onSelectionChanged(
-    DateTime dateTime,
+    LocalDate date,
     List<DailyIntakesLightReport> reports,
   ) {
-    final position = getReportPosition(dateTime, reports);
+    final position = getReportPosition(date, reports);
 
     _itemScrollController.jumpTo(index: position);
   }
 
   int getReportPosition(
-    DateTime dateTime,
+    LocalDate date,
     List<DailyIntakesLightReport> reports,
   ) {
     return reports
-            .mapIndexed((i, r) => r.date == Date.from(dateTime) ? i : null)
+            .mapIndexed((i, r) => r.date.calendarDate == date ? i : null)
             .firstWhere((i) => i != null) +
         1;
   }
@@ -109,7 +109,7 @@ class NutritionWeeklyReportsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reportsReverseSorted =
-        reports.sortedBy((e) => e.date, reverse: true).toList();
+        reports.sortedBy((e) => e.date.calendarDate, reverse: true).toList();
 
     return ListView.builder(
       itemCount: reportsReverseSorted.length + 1,

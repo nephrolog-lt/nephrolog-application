@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:nephrogo/extensions/extensions.dart';
 import 'package:nephrogo/models/contract.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/ui/charts/nutrient_bar_chart.dart';
 import 'package:nephrogo/ui/general/components.dart';
 import 'package:nephrogo/ui/tabs/nutrition/nutrition_components.dart';
 import 'package:nephrogo_api_client/model/daily_intakes_light_report.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'nutrition_summary_components.dart';
 
 class NutritionNutrientReportsList extends StatelessWidget {
   final List<DailyIntakesLightReport> reports;
-  final Date dateFrom;
-  final Date dateTo;
+  final LocalDate dateFrom;
+  final LocalDate dateTo;
   final Widget header;
   final Nutrient nutrient;
   final bool showGraphDataLabels;
@@ -35,7 +35,7 @@ class NutritionNutrientReportsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reportsReverseSorted =
-        reports.sortedBy((e) => e.date, reverse: true).toList();
+        reports.sortedBy((e) => e.date.calendarDate, reverse: true).toList();
 
     return ListView.builder(
       itemCount: reportsReverseSorted.length + 1,
