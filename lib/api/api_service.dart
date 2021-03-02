@@ -82,21 +82,20 @@ class ApiService {
   }
 
   NephrogoApiClient _buildNephrogoApiClient() {
-    final timeZoneName = DateTime.now().timeZoneName;
-
     final dio = Dio(BaseOptions(
       baseUrl: _baseApiUrl,
       connectTimeout: 8000,
       receiveTimeout: 5000,
       headers: {
-        'time-zone-name': timeZoneName,
+        'time-zone-name': DateTimeZone.local.id,
         'accept-encoding': 'br',
       },
     ));
 
     dio.transformer = DioBrotliTransformer();
     dio.httpClientAdapter = Http2Adapter(
-        ConnectionManager(idleTimeout: _connectionIdleTimeout.inMilliseconds));
+      ConnectionManager(idleTimeout: _connectionIdleTimeout.inMilliseconds),
+    );
 
     return NephrogoApiClient(
       dio: dio,

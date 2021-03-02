@@ -20,7 +20,6 @@ import 'nutrition_components.dart';
 import 'summary/nutrition_summary.dart';
 
 class NutritionTab extends StatelessWidget {
-  final now = DateTime.now();
   final apiService = ApiService();
 
   @override
@@ -32,15 +31,15 @@ class NutritionTab extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context) {
-    final appLocalizations = AppLocalizations.of(context);
-
     return AppStreamBuilder<NutritionScreenV2Response>(
       stream: apiService.getNutritionScreenStream(),
       builder: (context, data) {
         final latestIntakes = data.latestIntakes.toList();
 
         if (latestIntakes.isEmpty) {
-          return EmptyStateContainer(text: appLocalizations.nutritionEmpty);
+          return EmptyStateContainer(
+            text: context.appLocalizations.nutritionEmpty,
+          );
         }
 
         final lastWeekLightNutritionReports =
@@ -65,7 +64,7 @@ class NutritionTab extends StatelessWidget {
             ),
             SliverToBoxAdapter(
               child: DailyIntakesCard(
-                title: appLocalizations.lastMealsSectionTitle,
+                title: context.appLocalizations.lastMealsSectionTitle,
                 intakes: latestIntakes,
                 dailyNutrientNormsWithTotals: dailyNutrientNormsWithTotals,
                 leading: OutlinedButton(
@@ -73,7 +72,7 @@ class NutritionTab extends StatelessWidget {
                     context,
                     latestIntakes.first.consumedAt.calendarDate,
                   ),
-                  child: Text(appLocalizations.more.toUpperCase()),
+                  child: Text(context.appLocalizations.more.toUpperCase()),
                 ),
               ),
             ),
