@@ -55,5 +55,5 @@ Future<bool> showDeleteDialog({
         ],
       );
     },
-  );
+  ).then((r) => r ?? false);
 }
