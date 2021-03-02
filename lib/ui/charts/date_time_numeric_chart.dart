@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nephrogo/utils/date_utils.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:time_machine/time_machine.dart';
 
@@ -70,7 +71,7 @@ class DateTimeNumericChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return NumericChart(
       primaryXAxis: _getDateTimeAxis(),
-      series: series,
+      series: _getSeries(),
       chartTitleText: chartTitleText,
       yAxisText: yAxisText,
       decimalPlaces: decimalPlaces,
@@ -80,6 +81,20 @@ class DateTimeNumericChart extends StatelessWidget {
       legendPosition: legendPosition,
       legendToggleSeriesVisibility: legendToggleSeriesVisibility,
     );
+  }
+
+  List<XyDataSeries> _getSeries() {
+    return [
+      ...series,
+      LineSeries<LocalDate, DateTime>(
+        dataSource: DateUtils.generateDates(from, to).toList(),
+        xValueMapper: (d, _) => d.toDateTimeUnspecified(),
+        yValueMapper: (d, _) => 0,
+        isVisibleInLegend: false,
+        enableTooltip: false,
+        color: Colors.transparent,
+      ),
+    ];
   }
 
   DateTimeAxis _getDateTimeAxis() {
