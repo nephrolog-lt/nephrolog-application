@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:nephrogo/extensions/date_extensions.dart';
 import 'package:nephrogo/extensions/string_extensions.dart';
+import 'package:nephrogo/utils/date_utils.dart';
+import 'package:time_machine/time_machine.dart';
 
 class WeeklyPager<T> extends StatefulWidget {
   final ValueNotifier<T> valueChangeNotifier;
-  final Widget Function(DateTime from, DateTime to, T value) bodyBuilder;
-  final DateTime Function() earliestDate;
+  final Widget Function(LocalDate from, LocalDate to, T value) bodyBuilder;
+  final LocalDate Function() earliestDate;
 
   const WeeklyPager({
     Key key,
@@ -25,13 +26,13 @@ class _WeeklyPagerState<T> extends State<WeeklyPager<T>> {
 
   final _pageController = PageController();
 
-  final DateTime now = DateTime.now();
+  final today = LocalDate.today();
 
-  DateTime initialWeekStart;
-  DateTime initialWeekEnd;
+  LocalDate initialWeekStart;
+  LocalDate initialWeekEnd;
 
-  DateTime currentWeekStart;
-  DateTime currentWeekEnd;
+  LocalDate currentWeekStart;
+  LocalDate currentWeekEnd;
   T value;
 
   @override
@@ -40,10 +41,8 @@ class _WeeklyPagerState<T> extends State<WeeklyPager<T>> {
 
     value = widget.valueChangeNotifier.value;
 
-    final weekStartEnd = now.startAndEndOfWeek();
-
-    currentWeekStart = initialWeekStart = weekStartEnd.item1;
-    currentWeekEnd = initialWeekEnd = weekStartEnd.item2;
+    currentWeekStart = initialWeekStart = DateUtils.getFirstDayOfWeek(today);
+    currentWeekEnd = initialWeekEnd = DateUtils.getLastDayOfWeek(today);
 
     widget.valueChangeNotifier.addListener(onIndicatorChanged);
   }
@@ -89,19 +88,15 @@ class _WeeklyPagerState<T> extends State<WeeklyPager<T>> {
     });
   }
 
-  DateTime calculateWeekStart(int n) {
-    final changeDuration = Duration(days: 7 * n);
-
-    return initialWeekStart.subtract(changeDuration);
+  LocalDate calculateWeekStart(int n) {
+    return initialWeekStart.subtractWeeks(n);
   }
 
-  DateTime calculateWeekEnd(int n) {
-    final changeDuration = Duration(days: 7 * n);
-
-    return initialWeekEnd.subtract(changeDuration);
+  LocalDate calculateWeekEnd(int n) {
+    return initialWeekEnd.subtractWeeks(n);
   }
 
-  bool hasNextDateRange() => currentWeekEnd.isBefore(now);
+  bool hasNextDateRange() => currentWeekEnd < today;
 
   bool hasPreviousDateRange() {
     final earliestDate = widget.earliestDate();
@@ -110,7 +105,9 @@ class _WeeklyPagerState<T> extends State<WeeklyPager<T>> {
       return true;
     }
 
-    return !earliestDate.add(const Duration(days: 7)).isAfter(currentWeekEnd);
+    // TODO check this place
+    return earliestDate.subtractWeeks(1) <= currentWeekEnd;
+    // return !earliestDate.add(const Duration(days: 7)).isAfter(currentWeekEnd);
   }
 
   void advanceToNextDateRange() {
@@ -123,8 +120,8 @@ class _WeeklyPagerState<T> extends State<WeeklyPager<T>> {
   }
 
   String _getDateRangeFormatted() {
-    return '${dateFormatter.format(currentWeekStart).capitalizeFirst()} – '
-        '${dateFormatter.format(currentWeekEnd).capitalizeFirst()}';
+    return '${dateFormatter.format(currentWeekStart.toDateTimeUnspecified()).capitalizeFirst()} – '
+        '${dateFormatter.format(currentWeekEnd.toDateTimeUnspecified()).capitalizeFirst()}';
   }
 
   Widget _buildDateSelectionSection() {

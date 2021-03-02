@@ -3,10 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:nephrogo/extensions/extensions.dart';
 import 'package:nephrogo/l10n/localizations.dart';
 import 'package:nephrogo/models/contract.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/utils/date_utils.dart';
 import 'package:nephrogo_api_client/model/daily_intakes_light_report.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'date_time_numeric_chart.dart';
 
@@ -14,8 +14,8 @@ class NutrientBarChart extends StatelessWidget {
   final _percentFormat = NumberFormat.percentPattern();
 
   final Nutrient nutrient;
-  final DateTime minimumDate;
-  final DateTime maximumDate;
+  final LocalDate minimumDate;
+  final LocalDate maximumDate;
   final List<DailyIntakesLightReport> dailyIntakeLightReports;
   final bool showDataLabels;
 
@@ -30,7 +30,7 @@ class NutrientBarChart extends StatelessWidget {
 
   double get _dailyNorm {
     return dailyIntakeLightReports
-        .maxBy((index, e) => e.date)
+        .maxBy((index, e) => e.date.calendarDate)
         ?.nutrientNormsAndTotals
         ?.getDailyNutrientConsumption(nutrient)
         ?.norm
@@ -60,12 +60,16 @@ class NutrientBarChart extends StatelessWidget {
   }
 
   Iterable<XyDataSeries> _getColumnSeries(BuildContext context) sync* {
-    final lastReport = dailyIntakeLightReports.maxBy((_, r) => r.date);
+    final lastReport = dailyIntakeLightReports.maxBy(
+      (_, r) => r.date.calendarDate,
+    );
 
     yield ColumnSeries<DailyIntakesLightReport, DateTime>(
-      dataSource: dailyIntakeLightReports.sortedBy((e) => e.date).toList(),
+      dataSource:
+          dailyIntakeLightReports.sortedBy((e) => e.date.calendarDate).toList(),
       borderRadius: DateTimeNumericChart.rodTopRadius,
-      xValueMapper: (report, _) => report.date.toDate(),
+      xValueMapper: (report, _) =>
+          report.date.calendarDate.toDateTimeUnspecified(),
       yValueMapper: (report, _) {
         final total = report.nutrientNormsAndTotals
             .getDailyNutrientConsumption(nutrient)
@@ -107,13 +111,13 @@ class NutrientBarChart extends StatelessWidget {
 
     final scaledDailyNorm = _dailyNorm * nutrient.scale;
     final dates = DateUtils.generateDates(
-      minimumDate.subtract(const Duration(days: 1)).toDate(),
-      maximumDate.add(const Duration(days: 1)).toDate(),
+      minimumDate.subtractDays(1),
+      maximumDate.addDays(1),
     ).toList();
 
-    return LineSeries<Date, DateTime>(
+    return LineSeries<LocalDate, DateTime>(
       dataSource: dates,
-      xValueMapper: (date, _) => date,
+      xValueMapper: (date, _) => date.toDateTimeUnspecified(),
       yValueMapper: (date, _) => scaledDailyNorm,
       dashArray: [10, 10],
       width: 3,

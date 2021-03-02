@@ -14,6 +14,7 @@ import 'package:nephrogo_api_client/model/automatic_peritoneal_dialysis.dart';
 import 'package:nephrogo_api_client/model/automatic_peritoneal_dialysis_request.dart';
 import 'package:nephrogo_api_client/model/dialysate_color_enum.dart';
 import 'package:nephrogo_api_client/model/dialysis_solution_enum.dart';
+import 'package:time_machine/time_machine.dart';
 
 class AutomaticPeritonealDialysisCreationScreenArguments {
   final AutomaticPeritonealDialysis dialysis;
@@ -40,7 +41,9 @@ class _AutomaticPeritonealDialysisCreationScreenState
 
   final _apiService = ApiService();
 
-  final now = DateTime.now();
+  final now = LocalDateTime.now();
+  final today = LocalDate.today();
+
   AutomaticPeritonealDialysisRequestBuilder _requestBuilder;
 
   int _currentStep = 0;
@@ -58,7 +61,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
     _requestBuilder = widget.initialDialysis?.toRequestBuilder() ??
         AutomaticPeritonealDialysisRequestBuilder();
 
-    _requestBuilder.startedAt ??= DateTime.now().toUtc();
+    _requestBuilder.startedAt ??= now.withOffset(Offset.zero);
     _currentStep = _requestBuilder.isCompleted == false ? 1 : 0;
 
     _requestBuilder.isCompleted ??= false;
@@ -198,15 +201,14 @@ class _AutomaticPeritonealDialysisCreationScreenState
                 Flexible(
                   flex: 3,
                   child: AppDatePickerFormField(
-                    initialDate: _requestBuilder.startedAt.toLocal(),
-                    selectedDate: _requestBuilder.startedAt.toLocal(),
+                    initialDate: _requestBuilder.startedAt.calendarDate,
+                    selectedDate: _requestBuilder.startedAt.calendarDate,
                     firstDate: Constants.earliestDate,
-                    lastDate: DateTime.now(),
+                    lastDate: today,
                     validator: _formValidators.nonNull(),
-                    onDateChanged: (dt) {
-                      _requestBuilder.startedAt = _requestBuilder.startedAt
-                          .appliedDate(dt.toDate())
-                          .toUtc();
+                    onDateChanged: (date) {
+                      _requestBuilder.startedAt =
+                          _requestBuilder.startedAt.adjustDate((_) => date);
                     },
                     labelText: appLocalizations.date,
                   ),
@@ -214,13 +216,12 @@ class _AutomaticPeritonealDialysisCreationScreenState
                 Flexible(
                   flex: 2,
                   child: AppTimePickerFormField(
-                    initialTime: TimeOfDay.fromDateTime(
-                        _requestBuilder.startedAt.toLocal()),
+                    initialTime: _requestBuilder.startedAt.clockTime,
                     labelText: appLocalizations.mealCreationTime,
-                    onTimeChanged: (t) => _requestBuilder.startedAt =
-                        _requestBuilder.startedAt.applied(t).toUtc(),
-                    onTimeSaved: (t) => _requestBuilder.startedAt =
-                        _requestBuilder.startedAt.applied(t).toUtc(),
+                    onTimeChanged: (time) => _requestBuilder.startedAt =
+                        _requestBuilder.startedAt.adjustTime((_) => time),
+                    onTimeSaved: (time) => _requestBuilder.startedAt =
+                        _requestBuilder.startedAt.adjustTime((_) => time),
                   ),
                 ),
               ],
@@ -411,15 +412,16 @@ class _AutomaticPeritonealDialysisCreationScreenState
                 Flexible(
                   flex: 3,
                   child: AppDatePickerFormField(
-                    initialDate: _requestBuilder.finishedAt?.toLocal() ?? now,
-                    selectedDate: _requestBuilder.finishedAt?.toLocal() ?? now,
-                    firstDate: _requestBuilder.startedAt,
-                    lastDate: now,
+                    initialDate:
+                        _requestBuilder.finishedAt?.calendarDate ?? today,
+                    selectedDate:
+                        _requestBuilder.finishedAt?.calendarDate ?? today,
+                    firstDate: _requestBuilder.startedAt.calendarDate,
+                    lastDate: today,
                     validator: _formValidators.nonNull(),
-                    onDateChanged: (dt) {
-                      _requestBuilder.finishedAt = _requestBuilder.finishedAt
-                          .appliedDate(dt.toDate())
-                          .toUtc();
+                    onDateChanged: (date) {
+                      _requestBuilder.finishedAt =
+                          _requestBuilder.finishedAt.adjustDate((_) => date);
                     },
                     labelText: appLocalizations.date,
                   ),
@@ -427,17 +429,23 @@ class _AutomaticPeritonealDialysisCreationScreenState
                 Flexible(
                   flex: 2,
                   child: AppTimePickerFormField(
-                    initialTime: TimeOfDay.fromDateTime(
-                        _requestBuilder.finishedAt?.toLocal() ?? now),
+                    initialTime:
+                        _requestBuilder.finishedAt?.clockTime ?? now.clockTime,
                     labelText: appLocalizations.mealCreationTime,
-                    onTimeChanged: (t) => _requestBuilder.finishedAt =
-                        _requestBuilder.finishedAt.applied(t).toUtc(),
-                    onTimeSaved: (t) {
+                    onTimeChanged: (time) {
+                      _requestBuilder.finishedAt ??=
+                          now.withOffset(Offset.zero);
+
+                      _requestBuilder.finishedAt =
+                          _requestBuilder.finishedAt.adjustTime((_) => time);
+                    },
+                    onTimeSaved: (time) {
                       if (_isSecondStep) {
+                        _requestBuilder.finishedAt ??=
+                            now.withOffset(Offset.zero);
+
                         _requestBuilder.finishedAt =
-                            (_requestBuilder.finishedAt ?? now)
-                                .applied(t)
-                                .toUtc();
+                            _requestBuilder.finishedAt.adjustTime((_) => time);
                       }
                     },
                   ),
@@ -472,7 +480,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
     }
 
     return _apiService.updateAutomaticPeritonealDialysis(
-      widget.initialDialysis.date.toDate(),
+      widget.initialDialysis.date.calendarDate,
       request,
     );
   }
@@ -508,7 +516,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
     final isDeleted = await showDeleteDialog(
       context: context,
       onDelete: () => _apiService.deleteAutomaticPeritonealDialysis(
-        widget.initialDialysis.date.toDate(),
+        widget.initialDialysis.date.calendarDate,
       ),
     );
 

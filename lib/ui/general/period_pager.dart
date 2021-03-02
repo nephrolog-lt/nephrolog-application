@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nephrogo/extensions/extensions.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/utils/date_utils.dart';
+import 'package:time_machine/time_machine.dart';
 
 typedef PagerBodyBuilder = Widget Function(
   BuildContext context,
   Widget header,
-  Date from,
-  Date to,
+  LocalDate from,
+  LocalDate to,
 );
 
 typedef OnPageChanged = void Function(
-  Date from,
-  Date to,
+  LocalDate from,
+  LocalDate to,
 );
 
 enum PeriodPagerType {
@@ -25,8 +25,8 @@ enum PeriodPagerType {
 class PeriodPager extends StatelessWidget {
   final PeriodPagerType pagerType;
 
-  final Date earliestDate;
-  final Date initialDate;
+  final LocalDate earliestDate;
+  final LocalDate initialDate;
 
   final PagerBodyBuilder bodyBuilder;
 
@@ -73,8 +73,8 @@ class DailyPager extends StatelessWidget {
 
   final OnPageChanged onPageChanged;
 
-  final Date earliestDate;
-  final Date initialDate;
+  final LocalDate earliestDate;
+  final LocalDate initialDate;
 
   final PagerBodyBuilder bodyBuilder;
 
@@ -91,7 +91,7 @@ class DailyPager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final today = Date.today();
+    final today = LocalDate.today();
     final dates = DateUtils.generateDates(earliestDate, today).toList();
 
     final initialFromDateIndex = dates.indexOf(initialDate);
@@ -107,10 +107,14 @@ class DailyPager extends StatelessWidget {
     );
   }
 
-  Date _dateFromToDateTo(Date from) => from;
+  LocalDate _dateFromToDateTo(LocalDate from) => from;
 
-  Widget _buildHeaderText(BuildContext context, Date from, Date to) {
-    return Text(_dayFormatter.format(from).capitalizeFirst());
+  Widget _buildHeaderText(BuildContext context, LocalDate from, LocalDate to) {
+    return Text(_dayFormatter
+        .format(
+          from.toDateTimeUnspecified(),
+        )
+        .capitalizeFirst());
   }
 }
 
@@ -118,8 +122,8 @@ class WeeklyPager extends StatelessWidget {
   final dateFormatter = DateFormat.MMMMd();
   final _monthFormatter = DateFormat("MMMM ");
 
-  final Date earliestDate;
-  final Date initialDate;
+  final LocalDate earliestDate;
+  final LocalDate initialDate;
 
   final PagerBodyBuilder bodyBuilder;
 
@@ -135,10 +139,12 @@ class WeeklyPager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final today = Date.today();
+    final today = LocalDate.today();
     final dates = DateUtils.generateWeekDates(earliestDate, today).toList();
 
-    final initialFromDateIndex = dates.indexOf(initialDate.firstDayOfWeek());
+    final initialFromDateIndex = dates.indexOf(
+      DateUtils.getFirstDayOfWeek(initialDate),
+    );
     assert(initialFromDateIndex != -1);
 
     return _PeriodPager(
@@ -150,26 +156,29 @@ class WeeklyPager extends StatelessWidget {
     );
   }
 
-  Date _dateFromToDateTo(Date from) {
-    return from.lastDayOfWeek();
+  LocalDate _dateFromToDateTo(LocalDate from) {
+    return DateUtils.getLastDayOfWeek(from);
   }
 
-  Widget _buildHeaderText(BuildContext context, Date from, Date to) {
-    if (from.month == to.month) {
-      final formattedFrom = _monthFormatter.format(from).capitalizeFirst();
-      return Text("$formattedFrom${from.day} – ${to.day}");
+  Widget _buildHeaderText(BuildContext context, LocalDate from, LocalDate to) {
+    if (from.monthOfYear == to.monthOfYear) {
+      final formattedFrom = _monthFormatter
+          .format(from.toDateTimeUnspecified())
+          .capitalizeFirst();
+      return Text("$formattedFrom${from.dayOfMonth} – ${to.dayOfMonth}");
     }
 
-    return Text('${dateFormatter.format(from).capitalizeFirst()} – '
-        '${dateFormatter.format(to).capitalizeFirst()}');
+    return Text(
+        '${dateFormatter.format(from.toDateTimeUnspecified()).capitalizeFirst()} – '
+        '${dateFormatter.format(to.toDateTimeUnspecified()).capitalizeFirst()}');
   }
 }
 
 class MonthlyPager extends StatelessWidget {
   static final monthFormatter = DateFormat.yMMMM();
 
-  final Date earliestDate;
-  final Date initialDate;
+  final LocalDate earliestDate;
+  final LocalDate initialDate;
 
   final PagerBodyBuilder bodyBuilder;
 
@@ -185,11 +194,11 @@ class MonthlyPager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final today = Date.today();
+    final today = LocalDate.today();
     final dates = DateUtils.generateMonthDates(earliestDate, today).toList();
 
     final initialFromDateIndex =
-        dates.indexOf(Date(initialDate.year, initialDate.month, 1));
+        dates.indexOf(DateUtils.getFirstDayOfMonth(initialDate));
 
     assert(initialFromDateIndex != -1);
 
@@ -202,27 +211,31 @@ class MonthlyPager extends StatelessWidget {
     );
   }
 
-  Date _dateFromToDateTo(Date from) {
+  LocalDate _dateFromToDateTo(LocalDate from) {
     return DateUtils.getLastDayOfCurrentMonth(from);
   }
 
-  Widget _buildHeaderText(BuildContext context, Date from, Date to) {
-    return Text(monthFormatter.format(from).capitalizeFirst());
+  Widget _buildHeaderText(BuildContext context, LocalDate from, LocalDate to) {
+    return Text(monthFormatter
+        .format(
+          from.toDateTimeUnspecified(),
+        )
+        .capitalizeFirst());
   }
 }
 
 class _PeriodPager extends StatefulWidget {
-  final List<Date> allFromDates;
-  final Date initialFromDate;
+  final List<LocalDate> allFromDates;
+  final LocalDate initialFromDate;
 
-  final Date Function(Date from) dateFromToDateTo;
+  final LocalDate Function(LocalDate from) dateFromToDateTo;
 
   final OnPageChanged onPageChanged;
   final PagerBodyBuilder bodyBuilder;
   final Widget Function(
     BuildContext context,
-    Date from,
-    Date to,
+    LocalDate from,
+    LocalDate to,
   ) headerTextBuilder;
 
   const _PeriodPager({
@@ -247,7 +260,7 @@ class _PeriodPager extends StatefulWidget {
 class _PeriodPagerState extends State<_PeriodPager> {
   static const _animationDuration = Duration(milliseconds: 400);
 
-  List<Date> _dates;
+  List<LocalDate> _dates;
 
   PageController _pageController;
 
@@ -305,7 +318,7 @@ class _PeriodPagerState extends State<_PeriodPager> {
         duration: _animationDuration, curve: Curves.ease);
   }
 
-  Widget _buildDateSelectionSection(int index, Date from, Date to) {
+  Widget _buildDateSelectionSection(int index, LocalDate from, LocalDate to) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

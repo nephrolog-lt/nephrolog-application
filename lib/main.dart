@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'app.dart';
 
@@ -14,6 +15,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
+
+  await TimeMachine.initialize({'rootBundle': rootBundle});
 
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((record) {

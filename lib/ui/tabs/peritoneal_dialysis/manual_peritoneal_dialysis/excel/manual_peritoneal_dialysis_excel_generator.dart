@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:nephrogo/extensions/extensions.dart';
 import 'package:nephrogo/l10n/localizations.dart';
 import 'package:nephrogo/models/contract.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo_api_client/model/daily_health_status.dart';
 import 'package:nephrogo_api_client/model/daily_intakes_light_report.dart';
 import 'package:nephrogo_api_client/model/dialysate_color_enum.dart';
@@ -12,6 +11,7 @@ import 'package:nephrogo_api_client/model/manual_peritoneal_dialysis.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart';
+import 'package:time_machine/time_machine.dart';
 
 class ManualPeritonealDialysisExcelGenerator {
   static void _writeHeader(
@@ -67,7 +67,9 @@ class ManualPeritonealDialysisExcelGenerator {
     AppLocalizations appLocalizations,
   ) {
     sheet.getRangeByIndex(row, startCol).setText(
-          TimeOfDay.fromDateTime(dialysis.startedAt.toLocal()).format(context),
+          TimeOfDay.fromDateTime(
+            dialysis.startedAt.localDateTime.toDateTimeLocal(),
+          ).format(context),
         );
 
     final dialysisSolutionCellStyle = CellStyle(sheet.workbook)
@@ -111,7 +113,7 @@ class ManualPeritonealDialysisExcelGenerator {
 
     if (dialysis.finishedAt != null) {
       final time =
-          TimeOfDay.fromDateTime(dialysis.finishedAt.toLocal()).format(context);
+          dialysis.finishedAt.localDateTime.clockTime.formatHoursAndMinutes();
 
       sheet.getRangeByIndex(row, startCol + 7).setText(time);
     }
@@ -121,18 +123,18 @@ class ManualPeritonealDialysisExcelGenerator {
     Worksheet sheet,
     int row,
     DailyHealthStatus status,
-    Map<Date, int> liquidsMap,
+    Map<LocalDate, int> liquidsMap,
     BuildContext context,
     AppLocalizations appLocalizations,
   ) {
-    final date = status.date.toDate();
+    final date = status.date.calendarDate;
     sheet.getRangeByIndex(row, 1).setText(date.toString());
     sheet
         .getRangeByIndex(row, 2)
         .setNumber(status.totalManualPeritonealDialysisBalance.roundToDouble());
 
     final sortedDialysis = status.manualPeritonealDialysis
-        .sortedBy((d) => d.startedAt, reverse: true)
+        .sortedBy((d) => d.startedAt.localDateTime, reverse: true)
         .toList();
 
     final totalDialysis = sortedDialysis.length;
@@ -162,7 +164,7 @@ class ManualPeritonealDialysisExcelGenerator {
     }
 
     final bloodPressures = status.bloodPressures
-        .sortedBy((e) => e.measuredAt, reverse: true)
+        .sortedBy((e) => e.measuredAt.localDateTime, reverse: true)
         .map((d) => d.formatAmountWithoutDimensionWithTime(context))
         .join('\n');
 
@@ -171,7 +173,7 @@ class ManualPeritonealDialysisExcelGenerator {
       ..columnWidth = 40;
 
     final pulses = status.pulses
-        .sortedBy((e) => e.measuredAt, reverse: true)
+        .sortedBy((e) => e.measuredAt.localDateTime, reverse: true)
         .map((d) => d.formatAmountWithoutDimensionWithTime(context))
         .join('\n');
 
@@ -230,7 +232,7 @@ class ManualPeritonealDialysisExcelGenerator {
     sheet.name = context.appLocalizations.peritonealDialysisPlural;
 
     final liquidsMap =
-        lightDailyIntakeReports.groupBy((r) => r.date.toDate()).map(
+        lightDailyIntakeReports.groupBy((r) => r.date.calendarDate).map(
               (d, r) => MapEntry(
                 d,
                 r.first.nutrientNormsAndTotals.liquidsMl.total,
@@ -239,8 +241,9 @@ class ManualPeritonealDialysisExcelGenerator {
 
     _writeHeader(sheet, 1, context.appLocalizations);
 
-    final sortedReports =
-        dailyHealthStatuses.sortedBy((r) => r.date, reverse: true).toList();
+    final sortedReports = dailyHealthStatuses
+        .sortedBy((r) => r.date.calendarDate, reverse: true)
+        .toList();
 
     var writeToRow = 2;
     for (final r in sortedReports) {

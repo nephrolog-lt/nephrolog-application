@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:nephrogo/api/api_service.dart';
 import 'package:nephrogo/extensions/extensions.dart';
 import 'package:nephrogo/models/contract.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/routes.dart';
 import 'package:nephrogo/ui/general/app_steam_builder.dart';
 import 'package:nephrogo/ui/general/components.dart';
 import 'package:nephrogo/ui/tabs/health_status/health_status_components.dart';
 import 'package:nephrogo/ui/tabs/nutrition/nutrition_components.dart';
 import 'package:nephrogo_api_client/model/manual_peritoneal_dialysis_screen_response.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'manual_peritoneal_dialysis_creation_screen.dart';
 import 'manual_peritoneal_dialysis_screen.dart';
@@ -88,14 +88,15 @@ class _ManualPeritonealDialysisTabBody extends StatelessWidget {
   }
 
   Widget _buildTotalBalanceSection(BuildContext context) {
-    final today = Date.today();
+    final today = LocalDate.today();
 
     final healthStatusesWithDialysis = response.lastWeekHealthStatuses
         .where((s) => s.manualPeritonealDialysis.isNotEmpty)
         .toList();
 
-    final todayDialysis =
-        healthStatusesWithDialysis.where((r) => r.date == today).firstOrNull();
+    final todayDialysis = healthStatusesWithDialysis
+        .where((r) => r.date.calendarDate == today)
+        .firstOrNull();
 
     final todayFormatted =
         todayDialysis?.totalManualPeritonealDialysisBalanceFormatted ?? "—";
@@ -104,7 +105,7 @@ class _ManualPeritonealDialysisTabBody extends StatelessWidget {
         '${context.appLocalizations.todayBalance}: $todayFormatted';
 
     final initialDate = response.lastPeritonealDialysis
-            .map((d) => d.startedAt.toDate())
+            .map((d) => d.startedAt.calendarDate)
             .maxBy((_, d) => d) ??
         today;
 

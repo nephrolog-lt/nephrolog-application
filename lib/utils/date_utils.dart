@@ -1,60 +1,59 @@
-import 'package:nephrogo/extensions/extensions.dart';
-import 'package:nephrogo/models/date.dart';
-import 'package:tuple/tuple.dart';
+import 'package:time_machine/time_machine.dart';
 
 class DateUtils {
   DateUtils._();
 
-  static Iterable<Date> generateDates(
-    Date startDate,
-    Date endDate,
+  static Iterable<LocalDate> generateDates(
+    LocalDate startDate,
+    LocalDate endDate,
   ) sync* {
-    for (var date = startDate;
-        date.isBefore(endDate) || date == endDate;
-        date = date.add(const Duration(days: 1)).toDate()) {
-      yield Date.from(date);
-    }
-  }
-
-  static Iterable<Date> generateWeekDates(
-    Date startDate,
-    Date endDate,
-  ) sync* {
-    for (DateTime date = startDate.firstDayOfWeek();
-        date.isBefore(endDate) || date.isAtSameMomentAs(endDate);
-        date = date.add(const Duration(days: 7))) {
-      yield Date.from(date);
-    }
-  }
-
-  static Iterable<Date> generateMonthDates(
-    Date startDate,
-    Date endDate,
-  ) sync* {
-    final finalEndDate = getLastDayOfCurrentMonth(endDate);
-    for (var date = Date(startDate.year, startDate.month, 1);
-        date.isBefore(finalEndDate);
-        date = getFirstDayOfNextMonth(date)) {
+    for (var date = startDate; date <= endDate; date = date.addDays(1)) {
       yield date;
     }
   }
 
-  static Date getLastDayOfCurrentMonth(DateTime dateTime) {
-    return Date(dateTime.year, dateTime.month + 1, 0);
+  static Iterable<LocalDate> generateWeekDates(
+    LocalDate startDate,
+    LocalDate endDate,
+  ) sync* {
+    for (var date = getFirstDayOfWeek(startDate);
+        date <= endDate;
+        date = date.addWeeks(1)) {
+      yield date;
+    }
   }
 
-  static Date getFirstDayOfNextMonth(DateTime dateTime) {
-    return Date(dateTime.year, dateTime.month + 1, 1);
+  static Iterable<LocalDate> generateMonthDates(
+    LocalDate startDate,
+    LocalDate endDate,
+  ) sync* {
+    final adjustedStartDate = getFirstDayOfMonth(startDate);
+    final adjustedEndDate = getFirstDayOfMonth(endDate);
+
+    for (var date = adjustedStartDate;
+        date <= adjustedEndDate;
+        date = date.addMonths(1)) {
+      yield date;
+    }
   }
 
-  static Date getLastDayOfPreviousMonth(DateTime dateTime) {
-    return Date(dateTime.year, dateTime.month, 0);
+  static LocalDate getFirstDayOfWeek(LocalDate date) {
+    return date.subtractDays(
+      date.dayOfWeek.value - DayOfWeek.monday.value,
+    );
   }
 
-  static Tuple2<Date, Date> getStartAndEndOfMonth(DateTime dateTime) {
-    final start = Date(dateTime.year, dateTime.month, 1);
-    final end = DateUtils.getLastDayOfCurrentMonth(dateTime);
+  static LocalDate getLastDayOfWeek(LocalDate date) {
+    return date.addDays(
+      DayOfWeek.sunday.value - date.dayOfWeek.value,
+    );
+  }
 
-    return Tuple2(start, end);
+  static LocalDate getFirstDayOfMonth(LocalDate date) {
+    return LocalDate(date.year, date.monthOfYear, 1);
+  }
+
+  static LocalDate getLastDayOfCurrentMonth(LocalDate date) {
+    return getFirstDayOfMonth(date).addMonths(1).subtractDays(1);
   }
 }

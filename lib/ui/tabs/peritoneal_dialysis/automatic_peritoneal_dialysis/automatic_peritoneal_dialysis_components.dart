@@ -71,7 +71,7 @@ class AutomaticPeritonealDialysisTile extends StatelessWidget {
   String _getTitle(AppLocalizations appLocalizations) {
     if (dialysis.isCompleted) {
       return _dateTimeFormat
-          .format(dialysis.finishedAt.toLocal())
+          .format(dialysis.finishedAt.localDateTime.toDateTimeLocal())
           .capitalizeFirst();
     }
 

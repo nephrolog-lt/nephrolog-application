@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:nephrogo/extensions/extensions.dart';
 import 'package:nephrogo/l10n/localizations.dart';
 import 'package:nephrogo/models/contract.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/routes.dart';
 import 'package:nephrogo/ui/charts/nutrient_bar_chart.dart';
 import 'package:nephrogo/ui/forms/forms.dart';
@@ -19,6 +18,7 @@ import 'package:nephrogo_api_client/model/daily_nutrient_norms_with_totals.dart'
 import 'package:nephrogo_api_client/model/intake.dart';
 import 'package:nephrogo_api_client/model/meal_type_enum.dart';
 import 'package:nephrogo_api_client/model/nutrition_summary_statistics.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'intake_edit.dart';
 import 'product_search.dart';
@@ -121,8 +121,11 @@ class DailyIntakesReportSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = Text(
-        _dateFormat.format(dailyIntakesLightReport.date).capitalizeFirst());
+    final title = Text(_dateFormat
+        .format(
+          dailyIntakesLightReport.date.calendarDate.toDateTimeUnspecified(),
+        )
+        .capitalizeFirst());
 
     final sortedNutrients = dailyIntakesLightReport.nutrientNormsAndTotals
         .getSortedNutrientsByExistence();
@@ -135,7 +138,8 @@ class DailyIntakesReportSection extends StatelessWidget {
         onTap: () => Navigator.of(context).pushNamed(
           Routes.routeNutritionDailySummary,
           arguments: NutritionDailySummaryScreenArguments(
-              Date.from(dailyIntakesLightReport.date)),
+            dailyIntakesLightReport.date.calendarDate,
+          ),
         ),
       ),
       showDividers: true,
@@ -144,7 +148,7 @@ class DailyIntakesReportSection extends StatelessWidget {
         for (final nutrient in sortedNutrients)
           DailyIntakesReportNutrientTile(
             dailyIntakesLightReport.nutrientNormsAndTotals,
-            dailyIntakesLightReport.date.toDate(),
+            dailyIntakesLightReport.date.calendarDate,
             nutrient,
           )
       ],
@@ -254,7 +258,9 @@ class IntakeTile extends StatelessWidget {
   }
 
   Iterable<String> _getSubtitleParts(BuildContext context) sync* {
-    yield dateFormat.format(intake.consumedAt.toLocal()).capitalizeFirst();
+    yield dateFormat
+        .format(intake.consumedAt.localDateTime.toDateTimeLocal())
+        .capitalizeFirst();
 
     if (intake.mealType != MealTypeEnum.unknown) {
       yield intake.mealType.localizedName(context.appLocalizations);
@@ -310,7 +316,9 @@ class IntakeExpandableTile extends StatelessWidget {
     yield intake.getAmountFormatted();
 
     if (showDate) {
-      yield dateFormat.format(intake.consumedAt.toLocal()).capitalizeFirst();
+      yield dateFormat
+          .format(intake.consumedAt.localDateTime.toDateTimeLocal())
+          .capitalizeFirst();
 
       if (intake.mealType != MealTypeEnum.unknown) {
         yield intake.mealType.localizedName(context.appLocalizations);
@@ -405,7 +413,7 @@ class IntakeNutrientDenseTile extends StatelessWidget {
     return Navigator.of(context).pushNamed(
       Routes.routeNutritionDailySummary,
       arguments: NutritionDailySummaryScreenArguments(
-        intake.consumedAt.toDate(),
+        intake.consumedAt.calendarDate,
         nutrient: nutrient,
       ),
     );
@@ -429,7 +437,7 @@ class IntakeNutrientDenseTile extends StatelessWidget {
 
 class DailyIntakesReportNutrientTile extends StatelessWidget {
   final DailyNutrientNormsWithTotals dailyNutrientNormsAndTotals;
-  final Date date;
+  final LocalDate date;
   final Nutrient nutrient;
 
   const DailyIntakesReportNutrientTile(
@@ -516,7 +524,7 @@ class DailyIntakesReportNutrientTile extends StatelessWidget {
 class NutrientDailyNutritionTile extends StatelessWidget {
   final _dateFormat = DateFormat('EEEE, MMMM d');
 
-  final Date date;
+  final LocalDate date;
   final DailyNutrientNormsWithTotals dailyNutrientNormsAndTotals;
   final Nutrient nutrient;
 
@@ -533,7 +541,7 @@ class NutrientDailyNutritionTile extends StatelessWidget {
   NutrientDailyNutritionTile.fromLightReport(
     this.nutrient,
     DailyIntakesLightReport lightReport,
-  )   : date = lightReport.date.toDate(),
+  )   : date = lightReport.date.calendarDate,
         dailyNutrientNormsAndTotals = lightReport.nutrientNormsAndTotals;
 
   DailyNutrientConsumption get consumption =>
@@ -546,7 +554,11 @@ class NutrientDailyNutritionTile extends StatelessWidget {
     final percentageRounded = consumption.totalConsumptionRoundedPercentage();
 
     return AppListTile(
-      title: Text(_dateFormat.format(date).capitalizeFirst()),
+      title: Text(_dateFormat
+          .format(
+            date.toDateTimeUnspecified(),
+          )
+          .capitalizeFirst()),
       subtitle: Text(_getSubtitleText(appLocalizations)),
       leading: _leadingTotalConsumptionIndicator(),
       isThreeLine: consumption.normExceeded != null,
@@ -617,7 +629,7 @@ class NutrientDailyNutritionTile extends StatelessWidget {
       return CircleAvatar(
         backgroundColor: Colors.brown,
         child: Text(
-          date.day.toString(),
+          date.dayOfMonth.toString(),
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: Colors.white,
@@ -717,7 +729,9 @@ class NutrientIntakeTile extends StatelessWidget {
   ) sync* {
     yield intake.getAmountFormatted();
 
-    yield dateFormat.format(intake.consumedAt.toLocal()).capitalizeFirst();
+    yield dateFormat
+        .format(intake.consumedAt.localDateTime.toDateTimeLocal())
+        .capitalizeFirst();
 
     if (intake.mealType != MealTypeEnum.unknown) {
       yield intake.mealType.localizedName(appLocalizations);
@@ -763,9 +777,10 @@ class NutrientChartSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final today = Date.today();
+    final today = LocalDate.today();
 
-    final todaysReport = reports.where((r) => r.date == today).firstOrNull();
+    final todaysReport =
+        reports.where((r) => r.date.calendarDate == today).firstOrNull();
 
     final dailyNormFormatted = todaysReport?.nutrientNormsAndTotals
         ?.getNutrientNormFormatted(nutrient);
@@ -810,7 +825,7 @@ class NutrientChartSection extends StatelessWidget {
               dailyIntakeLightReports: reports,
               nutrient: nutrient,
               maximumDate: today,
-              minimumDate: today.subtract(const Duration(days: 6)),
+              minimumDate: today.subtractDays(6),
               showDataLabels: true,
             ),
           )

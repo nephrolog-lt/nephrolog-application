@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:nephrogo_api_client/model/meal_type_enum.dart';
-
-import 'date.dart';
+import 'package:time_machine/time_machine.dart';
 
 enum Nutrient {
   potassium,
@@ -29,7 +28,7 @@ enum HealthIndicator {
 
 class DailyMealTypeNutrientConsumption {
   final Nutrient nutrient;
-  final Date date;
+  final LocalDate date;
   final MealTypeEnum mealType;
   final int dailyTotal;
   final int drinksTotal;

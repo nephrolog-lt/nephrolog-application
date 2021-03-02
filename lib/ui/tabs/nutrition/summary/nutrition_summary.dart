@@ -3,12 +3,12 @@ import 'package:nephrogo/api/api_service.dart';
 import 'package:nephrogo/constants.dart';
 import 'package:nephrogo/extensions/extensions.dart';
 import 'package:nephrogo/models/contract.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/ui/general/app_steam_builder.dart';
 import 'package:nephrogo/ui/general/period_pager.dart';
 import 'package:nephrogo_api_client/model/daily_intakes_light_report.dart';
 import 'package:nephrogo_api_client/model/daily_intakes_reports_response.dart';
 import 'package:nephrogo_api_client/model/nutrition_summary_statistics.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'nutrition_nutrient_summary_list.dart';
 import 'nutrition_summary_components.dart';
@@ -112,11 +112,13 @@ class _NutritionMonthlySummaryTabBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final today = LocalDate.today();
+
     return MonthlyPager(
-      earliestDate: nutritionSummaryStatistics?.minReportDate?.toDate() ??
+      earliestDate: nutritionSummaryStatistics?.minReportDate?.calendarDate ??
           Constants.earliestDate,
       initialDate:
-          nutritionSummaryStatistics?.maxReportDate?.toDate() ?? Date.today(),
+          nutritionSummaryStatistics?.maxReportDate?.calendarDate ?? today,
       bodyBuilder: (context, header, from, to) {
         return AppStreamBuilder<DailyIntakesReportsResponse>(
           stream: _apiService.getLightDailyIntakeReportsStream(from, to),
@@ -163,11 +165,13 @@ class _NutritionWeeklySummaryTabBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final today = LocalDate.today();
+
     return WeeklyPager(
-      earliestDate: nutritionSummaryStatistics?.minReportDate?.toDate() ??
+      earliestDate: nutritionSummaryStatistics?.minReportDate?.calendarDate ??
           Constants.earliestDate,
       initialDate:
-          nutritionSummaryStatistics?.maxReportDate?.toDate() ?? Date.today(),
+          nutritionSummaryStatistics?.maxReportDate?.calendarDate ?? today,
       bodyBuilder: (context, header, from, to) {
         return AppStreamBuilder<DailyIntakesReportsResponse>(
           stream: _apiService.getLightDailyIntakeReportsStream(from, to),
@@ -188,8 +192,8 @@ class _NutritionWeeklySummaryTabBody extends StatelessWidget {
   Widget _buildListComponent(
     Widget header,
     List<DailyIntakesLightReport> reports,
-    Date dateFrom,
-    Date dateTo,
+    LocalDate dateFrom,
+    LocalDate dateTo,
   ) {
     if (nutrient != null) {
       return NutritionNutrientReportsList(

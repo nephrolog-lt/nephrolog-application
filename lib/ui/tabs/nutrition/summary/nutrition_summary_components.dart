@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:nephrogo/extensions/extensions.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/routes.dart';
 import 'package:nephrogo/ui/general/components.dart';
 import 'package:nephrogo/ui/tabs/nutrition/product_search.dart';
 import 'package:nephrogo_api_client/model/meal_type_enum.dart';
+import 'package:time_machine/time_machine.dart';
 
 class NutritionDailyListWithHeaderEmpty extends StatelessWidget {
   final Widget header;
-  final Date date;
+  final LocalDate date;
 
   const NutritionDailyListWithHeaderEmpty({
     Key key,

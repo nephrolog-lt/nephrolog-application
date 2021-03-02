@@ -6,7 +6,6 @@ import 'package:nephrogo/constants.dart';
 import 'package:nephrogo/extensions/extensions.dart';
 import 'package:nephrogo/l10n/localizations.dart';
 import 'package:nephrogo/models/contract.dart';
-import 'package:nephrogo/models/date.dart';
 import 'package:nephrogo/routes.dart';
 import 'package:nephrogo/ui/charts/health_indicator_bar_chart.dart';
 import 'package:nephrogo/ui/general/app_steam_builder.dart';
@@ -18,6 +17,7 @@ import 'package:nephrogo/ui/tabs/health_status/pulse_edit_screen.dart';
 import 'package:nephrogo/ui/tabs/nutrition/summary/nutrition_summary_components.dart';
 import 'package:nephrogo_api_client/model/daily_health_status.dart';
 import 'package:nephrogo_api_client/model/health_status_weekly_screen_response.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'blood_pressure_and_pulse_creation_screen.dart';
 
@@ -100,7 +100,7 @@ class _HealthStatusScreenTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return PeriodPager(
       pagerType: pagerType,
-      initialDate: Date.today(),
+      initialDate: LocalDate.today(),
       earliestDate: Constants.earliestDate,
       bodyBuilder: _bodyBuilder,
     );
@@ -109,8 +109,8 @@ class _HealthStatusScreenTab extends StatelessWidget {
   Widget _bodyBuilder(
     BuildContext context,
     Widget header,
-    Date from,
-    Date to,
+    LocalDate from,
+    LocalDate to,
   ) {
     return AppStreamBuilder<HealthStatusWeeklyScreenResponse>(
       stream: _apiService.getHealthStatusesStream(from, to),
@@ -151,7 +151,7 @@ class _HealthStatusScreenTab extends StatelessWidget {
 }
 
 class EmptyDailyHealthIndicatorsListWithChart extends StatelessWidget {
-  final Date date;
+  final LocalDate date;
   final HealthIndicator healthIndicator;
   final Widget header;
 
@@ -194,8 +194,8 @@ class HealthIndicatorsListWithChart extends StatelessWidget {
   final HealthIndicator healthIndicator;
   final List<DailyHealthStatus> dailyHealthStatuses;
   final AppLocalizations appLocalizations;
-  final DateTime from;
-  final DateTime to;
+  final LocalDate from;
+  final LocalDate to;
   final Widget header;
 
   const HealthIndicatorsListWithChart({
@@ -212,7 +212,7 @@ class HealthIndicatorsListWithChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final sortedHealthStatusesWithIndicators = dailyHealthStatuses
         .where((dhs) => dhs.isIndicatorExists(healthIndicator))
-        .sortedBy((e) => e.date, reverse: true)
+        .sortedBy((e) => e.date.calendarDate, reverse: true)
         .toList();
 
     return ListView.builder(
@@ -264,7 +264,7 @@ class HealthIndicatorsListWithChart extends StatelessWidget {
 class DailyHealthStatusIndicatorMultiValueSection extends StatelessWidget {
   final dateFormat = DateFormat('EEEE, MMMM d');
 
-  final Date date;
+  final LocalDate date;
   final HealthIndicator indicator;
   final List<Widget> children;
 
@@ -280,7 +280,7 @@ class DailyHealthStatusIndicatorMultiValueSection extends StatelessWidget {
     return BasicSection(
       header: AppListTile(
         title: Text(
-          dateFormat.format(date).capitalizeFirst(),
+          dateFormat.format(date.toDateTimeUnspecified()).capitalizeFirst(),
           maxLines: 1,
         ),
         subtitle: Text(indicator.name(context.appLocalizations)),
@@ -318,19 +318,23 @@ class DailyHealthStatusIndicatorMultiValueSectionWithTiles
   @override
   Widget build(BuildContext context) {
     return DailyHealthStatusIndicatorMultiValueSection(
-      date: dailyHealthStatus.date.toDate(),
+      date: dailyHealthStatus.date.calendarDate,
       indicator: indicator,
       children: _buildChildren(context).toList(),
     );
   }
 
   Widget _buildValueTile({
-    @required DateTime dateTime,
+    @required LocalDateTime dateTime,
     @required String formattedAmount,
     @required GestureTapCallback onTap,
   }) {
     return AppListTile(
-      title: Text(fullDateFormat.format(dateTime.toLocal()).capitalizeFirst()),
+      title: Text(fullDateFormat
+          .format(
+            dateTime.toDateTimeLocal(),
+          )
+          .capitalizeFirst()),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -348,11 +352,11 @@ class DailyHealthStatusIndicatorMultiValueSectionWithTiles
 
   Iterable<Widget> _buildBloodPressureChildren(BuildContext context) {
     return dailyHealthStatus.bloodPressures
-        .sortedBy((e) => e.measuredAt, reverse: true)
+        .sortedBy((e) => e.measuredAt.toInstant(), reverse: true)
         .map(
       (b) {
         return _buildValueTile(
-          dateTime: b.measuredAt,
+          dateTime: b.measuredAt.localDateTime,
           formattedAmount: b.formattedAmount,
           onTap: () => Navigator.pushNamed(
             context,
@@ -366,11 +370,11 @@ class DailyHealthStatusIndicatorMultiValueSectionWithTiles
 
   Iterable<Widget> _buildPulseChildren(BuildContext context) {
     return dailyHealthStatus.pulses
-        .sortedBy((e) => e.measuredAt, reverse: true)
+        .sortedBy((e) => e.measuredAt.toInstant(), reverse: true)
         .map(
       (p) {
         return _buildValueTile(
-          dateTime: p.measuredAt,
+          dateTime: p.measuredAt.localDateTime,
           formattedAmount: p.formattedAmount(context.appLocalizations),
           onTap: () => Navigator.pushNamed(
             context,
@@ -421,8 +425,9 @@ class DailyHealthStatusIndicatorTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = dailyHealthStatus.date.toDate();
-    final dateTitle = _dateFormat.format(date).capitalizeFirst();
+    final date = dailyHealthStatus.date.calendarDate;
+    final dateTitle =
+        _dateFormat.format(date.toDateTimeUnspecified()).capitalizeFirst();
     final subtitle = getSubtitle(context.appLocalizations);
 
     final formattedAmount = dailyHealthStatus.getHealthIndicatorFormatted(

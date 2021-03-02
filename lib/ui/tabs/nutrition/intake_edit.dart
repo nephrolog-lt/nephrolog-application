@@ -14,6 +14,7 @@ import 'package:nephrogo_api_client/model/intake.dart';
 import 'package:nephrogo_api_client/model/intake_request.dart';
 import 'package:nephrogo_api_client/model/meal_type_enum.dart';
 import 'package:nephrogo_api_client/model/product.dart';
+import 'package:time_machine/time_machine.dart';
 
 import 'nutrition_components.dart';
 
@@ -61,7 +62,7 @@ class _IntakeEditScreenState extends State<IntakeEditScreen> {
 
   Product get product => widget.intake.product;
 
-  DateTime _consumedAt;
+  LocalDateTime _consumedAt;
 
   bool get isAmountInMilliliters => product.densityGMl != null;
 
@@ -75,7 +76,7 @@ class _IntakeEditScreenState extends State<IntakeEditScreen> {
 
     _intakeBuilder.productId = product.id;
 
-    _consumedAt = widget.intake.consumedAt.toLocal();
+    _consumedAt = widget.intake.consumedAt.localDateTime;
   }
 
   @override
@@ -161,25 +162,18 @@ class _IntakeEditScreenState extends State<IntakeEditScreen> {
                 BasicSection(
                   children: [
                     AppDatePickerFormField(
-                      initialDate: _consumedAt,
-                      selectedDate: _consumedAt,
+                      initialDate: _consumedAt.calendarDate,
+                      selectedDate: _consumedAt.calendarDate,
                       firstDate: Constants.earliestDate,
-                      lastDate: DateTime.now(),
+                      lastDate: LocalDate.today(),
                       validator: formValidators.nonNull(),
                       dateFormat: _dateFormat,
                       prefixIcon: const Icon(Icons.calendar_today),
-                      onDateChanged: (dt) {
-                        final ldt = dt.toLocal();
-                        _consumedAt = DateTime(
-                          ldt.year,
-                          ldt.month,
-                          ldt.day,
-                          _consumedAt.hour,
-                          _consumedAt.minute,
-                        );
+                      onDateChanged: (date) {
+                        _consumedAt = _consumedAt.adjustDate((_) => date);
                       },
-                      onDateSaved: (dt) =>
-                          _intakeBuilder.consumedAt = _consumedAt.toUtc(),
+                      onDateSaved: (dt) => _intakeBuilder.consumedAt =
+                          _consumedAt.withOffset(Offset.zero),
                       labelText: appLocalizations.date,
                     ),
                     MealTypeSelectionFormField(
