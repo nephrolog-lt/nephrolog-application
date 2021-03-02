@@ -50,7 +50,7 @@ dependencies:
 
   scrollable_positioned_list: ^0.1.9
 
-  time_machine: 0.9.15
+  time_machine: 0.9.16
 
   dio: ^3.0.10
   dio_http2_adapter: ^1.0.1
