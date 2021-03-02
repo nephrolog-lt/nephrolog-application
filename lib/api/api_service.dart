@@ -8,7 +8,6 @@ import 'package:dio_http2_adapter/dio_http2_adapter.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, required;
 import 'package:logging/logging.dart';
 import 'package:nephrogo/authentication/authentication_provider.dart';
-import 'package:nephrogo/extensions/extensions.dart';
 import 'package:nephrogo_api_client/api.dart';
 import 'package:nephrogo_api_client/api/general_recommendations_api.dart';
 import 'package:nephrogo_api_client/api/health_status_api.dart';
@@ -149,8 +148,8 @@ class ApiService {
   ) {
     return _nutritionApi
         .nutritionDailyReportsLightRetrieve(
-          from: from.toOffsetDate(),
-          to: to.toOffsetDate(),
+          from: _HackedOffsetDate(from),
+          to: _HackedOffsetDate(to),
         )
         .then((r) => r.data);
   }
@@ -183,8 +182,8 @@ class ApiService {
       LocalDate from, LocalDate to) {
     return _nutritionApi
         .nutritionWeeklyRetrieve(
-          from.toOffsetDate(),
-          to.toOffsetDate(),
+          _HackedOffsetDate(from),
+          _HackedOffsetDate(to),
         )
         .then((r) => r.data);
   }
@@ -272,7 +271,7 @@ class ApiService {
 
   Future<DailyHealthStatus> getDailyHealthStatus(LocalDate date) {
     return _healthStatusApi
-        .healthStatusRetrieve(date.toOffsetDate())
+        .healthStatusRetrieve(_HackedOffsetDate(date))
         .then((r) => r.data)
         .catchError(
           (e) => null,
@@ -357,7 +356,10 @@ class ApiService {
     LocalDate to,
   ) {
     return _healthStatusApi
-        .healthStatusWeeklyRetrieve(from.toOffsetDate(), to.toOffsetDate())
+        .healthStatusWeeklyRetrieve(
+          _HackedOffsetDate(from),
+          _HackedOffsetDate(to),
+        )
         .then((r) => r.data);
   }
 
@@ -599,5 +601,14 @@ class _FirebaseAuthenticationInterceptor extends Interceptor {
       }
     }
     return err;
+  }
+}
+
+class _HackedOffsetDate extends OffsetDate {
+  _HackedOffsetDate(LocalDate calendarDate) : super(calendarDate, Offset.zero);
+
+  @override
+  String toString([String patternText, Culture culture]) {
+    return super.toString('yyyy-MM-dd');
   }
 }

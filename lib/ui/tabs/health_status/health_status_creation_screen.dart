@@ -66,7 +66,7 @@ class _HealthStatusCreationScreenState
           _requestBuilder = healthStatus?.toRequest()?.toBuilder() ??
               DailyHealthStatusRequestBuilder();
 
-          _requestBuilder.date = widget.date.toOffsetDate();
+          _requestBuilder.date = widget.date.withOffset(Offset.zero);
 
           return _buildBody();
         },
