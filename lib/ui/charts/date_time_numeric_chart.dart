@@ -110,10 +110,13 @@ class DateTimeNumericChart extends StatelessWidget {
     if (daysDifference <= 1) {
       intervalType = DateTimeIntervalType.hours;
       interval = 1;
-    } else if (daysDifference <= 7) {
-      intervalType = DateTimeIntervalType.days;
-      interval = 1;
+    } else {
       adjustedDateFrom = adjustedDateFrom.subtractHours(12);
+
+      if (daysDifference <= 7) {
+        intervalType = DateTimeIntervalType.days;
+        interval = 1;
+      }
     }
 
     return DateTimeAxis(
