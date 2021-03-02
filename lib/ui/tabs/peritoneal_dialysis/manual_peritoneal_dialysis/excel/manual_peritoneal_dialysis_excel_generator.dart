@@ -67,9 +67,7 @@ class ManualPeritonealDialysisExcelGenerator {
     AppLocalizations appLocalizations,
   ) {
     sheet.getRangeByIndex(row, startCol).setText(
-          TimeOfDay.fromDateTime(
-            dialysis.startedAt.localDateTime.toDateTimeLocal(),
-          ).format(context),
+          dialysis.startedAt.localDateTime.clockTime.formatHoursAndMinutes(),
         );
 
     final dialysisSolutionCellStyle = CellStyle(sheet.workbook)
@@ -113,7 +111,7 @@ class ManualPeritonealDialysisExcelGenerator {
 
     if (dialysis.finishedAt != null) {
       final time =
-          dialysis.finishedAt.localDateTime.clockTime.formatHoursAndMinutes();
+          dialysis.finishedAt.localDateTime.toString("yyyy-MM-dd HH:mm");
 
       sheet.getRangeByIndex(row, startCol + 7).setText(time);
     }
@@ -128,7 +126,7 @@ class ManualPeritonealDialysisExcelGenerator {
     AppLocalizations appLocalizations,
   ) {
     final date = status.date.calendarDate;
-    sheet.getRangeByIndex(row, 1).setText(date.toString());
+    sheet.getRangeByIndex(row, 1).setText(date.toString("yyyy-MM-dd"));
     sheet
         .getRangeByIndex(row, 2)
         .setNumber(status.totalManualPeritonealDialysisBalance.roundToDouble());
