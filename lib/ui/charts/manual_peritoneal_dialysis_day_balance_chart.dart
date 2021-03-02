@@ -33,9 +33,9 @@ class ManualPeritonealDialysisDayBalanceChart extends StatelessWidget {
 
     yield BarSeries<ManualPeritonealDialysis, String>(
       dataSource: dialysis,
-      xValueMapper: (d, _) =>
-          TimeOfDay.fromDateTime(d.startedAt.localDateTime.toDateTimeLocal())
-              .format(context),
+      xValueMapper: (d, _) {
+        return d.startedAt.localDateTime.clockTime.formatHoursAndMinutes();
+      },
       yValueMapper: (d, i) => d.balance,
       dataLabelSettings: DataLabelSettings(
         isVisible: true,
