@@ -132,7 +132,7 @@ class _NutritionCalendarState extends State<NutritionCalendar> {
         shape: BoxShape.circle,
       );
     } else if (!_availableDatesSet.contains(date)) {
-      if (date < _today) {
+      if (_today < date) {
         fontColor = Colors.grey;
       } else {
         fontColor = null;
