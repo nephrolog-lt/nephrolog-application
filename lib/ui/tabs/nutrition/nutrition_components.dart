@@ -275,12 +275,14 @@ class IntakeExpandableTile extends StatelessWidget {
   final DailyNutrientNormsWithTotals dailyNutrientNormsAndTotals;
   final bool initiallyExpanded;
   final bool showDate;
+  final bool allowLongClick;
 
   IntakeExpandableTile(
     this.intake,
     this.dailyNutrientNormsAndTotals, {
     this.initiallyExpanded = false,
     this.showDate = true,
+    this.allowLongClick = true,
   }) : super(key: PageStorageKey(intake));
 
   @override
@@ -294,7 +296,7 @@ class IntakeExpandableTile extends StatelessWidget {
         title: Text(intake.product.name),
         subtitle: Text(_getSubtitleParts(context).join(" | ")),
         onLongPress:
-            (intake.id != null) ? () => _showLongClickDialog(context) : null,
+            allowLongClick ? () => _showLongClickDialog(context) : null,
         initiallyExpanded: initiallyExpanded,
         leading: ProductKindIcon(productKind: intake.product.productKind),
         children: ListTile.divideTiles(

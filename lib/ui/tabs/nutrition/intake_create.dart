@@ -97,8 +97,8 @@ class _IntakeCreateScreenState extends State<IntakeCreateScreen> {
       _consumedAt = _consumedAt.adjustDate((_) => widget.initialDate);
     }
 
-    final fakedIntake =
-        widget.initialProduct.fakeIntake(consumedAt: _consumedAt);
+    final fakedIntake = widget.initialProduct
+        .fakeIntake(consumedAt: _consumedAt, mealType: _mealType);
 
     _intakeSectionsOptions = [_IntakeSectionOption(fakedIntake, FocusNode())];
   }
@@ -385,6 +385,7 @@ class _IntakeEditSectionState extends State<_IntakeEditSection> {
           widget.dailyNutrientNormsAndTotals,
           initiallyExpanded: widget.initiallyExpanded,
           showDate: false,
+          allowLongClick: false,
         ),
       ],
     );
@@ -404,6 +405,7 @@ class _IntakeEditSectionState extends State<_IntakeEditSection> {
 
     return _product.fakeIntake(
       consumedAt: _consumedAt,
+      mealType: widget.initialFakedIntake.mealType,
       amountG: amountG,
       amountMl: amountMl,
     );

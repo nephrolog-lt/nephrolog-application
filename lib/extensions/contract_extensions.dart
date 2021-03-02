@@ -96,14 +96,15 @@ extension ProductExtensions on Product {
   // after searching for a product
   Intake fakeIntake({
     @required LocalDateTime consumedAt,
+    @required MealTypeEnum mealType,
     int amountG = 0,
     int amountMl,
-    MealTypeEnum mealType,
   }) {
     assert(amountG != null);
 
     final builder = IntakeBuilder();
 
+    builder.id = 0;
     builder.consumedAt = consumedAt.withOffset(Offset.zero);
 
     builder.amountG = amountG;

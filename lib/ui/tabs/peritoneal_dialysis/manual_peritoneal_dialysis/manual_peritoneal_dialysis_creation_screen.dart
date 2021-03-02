@@ -296,6 +296,8 @@ class _ManualPeritonealDialysisCreationScreenState
                     dateFormat: _dateFormat,
                     validator: _formValidators.nonNull(),
                     onDateChanged: (date) {
+                      _requestBuilder.finishedAt ??=
+                          now.withOffset(Offset.zero);
                       _requestBuilder.finishedAt =
                           _requestBuilder.finishedAt.adjustDate((_) => date);
                     },
