@@ -111,7 +111,7 @@ class ManualPeritonealDialysisExcelGenerator {
 
     if (dialysis.finishedAt != null) {
       final time =
-          dialysis.finishedAt.localDateTime.toString("yyyy-MM-dd HH:mm");
+          dialysis.finishedAt.localDateTime.toString('yyyy-MM-dd HH:mm');
 
       sheet.getRangeByIndex(row, startCol + 7).setText(time);
     }
@@ -126,7 +126,7 @@ class ManualPeritonealDialysisExcelGenerator {
     AppLocalizations appLocalizations,
   ) {
     final date = status.date.calendarDate;
-    sheet.getRangeByIndex(row, 1).setText(date.toString("yyyy-MM-dd"));
+    sheet.getRangeByIndex(row, 1).setText(date.toString('yyyy-MM-dd'));
     sheet
         .getRangeByIndex(row, 2)
         .setNumber(status.totalManualPeritonealDialysisBalance.roundToDouble());
@@ -209,7 +209,7 @@ class ManualPeritonealDialysisExcelGenerator {
 
   static Future<void> _saveAndOpen(Workbook workbook) async {
     final directory = await getApplicationDocumentsDirectory();
-    final fullPath = "${directory.path}/rankines-peritorines-dializes.xlsx";
+    final fullPath = '${directory.path}/rankines-peritorines-dializes.xlsx';
 
     final bytes = workbook.saveAsStream();
     File(fullPath).writeAsBytes(bytes, flush: true);

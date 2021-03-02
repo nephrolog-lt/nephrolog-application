@@ -765,7 +765,7 @@ extension DailyHealthStatusExtensions on DailyHealthStatus {
     switch (indicator) {
       case HealthIndicator.bloodPressure:
         throw ArgumentError(
-            "Unable to get blood pressure indicator value. Please use different method");
+            'Unable to get blood pressure indicator value. Please use different method');
       case HealthIndicator.pulse:
         return pulses.maxBy((_, p) => p.measuredAt.localDateTime).pulse;
       case HealthIndicator.weight:
@@ -870,7 +870,7 @@ extension DailyHealthStatusExtensions on DailyHealthStatus {
       manualPeritonealDialysis.sumBy((_, d) => d.balance);
 
   String get totalManualPeritonealDialysisBalanceFormatted =>
-      _formatAmount(totalManualPeritonealDialysisBalance, "ml");
+      _formatAmount(totalManualPeritonealDialysisBalance, 'ml');
 }
 
 extension HealthIndicatorExtensions on HealthIndicator {
@@ -954,15 +954,15 @@ extension HealthIndicatorExtensions on HealthIndicator {
   String dimension(AppLocalizations appLocalizations) {
     switch (this) {
       case HealthIndicator.bloodPressure:
-        return "mmHg";
+        return 'mmHg';
       case HealthIndicator.pulse:
         return appLocalizations.pulseDimension;
       case HealthIndicator.weight:
-        return "kg";
+        return 'kg';
       case HealthIndicator.glucose:
-        return "mmol/l";
+        return 'mmol/l';
       case HealthIndicator.urine:
-        return "ml";
+        return 'ml';
       case HealthIndicator.severityOfSwelling:
       case HealthIndicator.swellings:
       case HealthIndicator.wellBeing:
@@ -1153,7 +1153,7 @@ extension ManualPeritonealDialysisExtensions on ManualPeritonealDialysis {
 
   String get formattedSolutionOut {
     if (solutionOutMl == null) {
-      return "-";
+      return '-';
     }
     return _formatAmount(solutionOutMl, 'ml');
   }

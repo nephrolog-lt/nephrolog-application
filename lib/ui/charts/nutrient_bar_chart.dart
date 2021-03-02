@@ -49,7 +49,7 @@ class NutrientBarChart extends StatelessWidget {
 
     return DateTimeNumericChart(
       series: _getColumnSeries(context).toList(),
-      yAxisText: "$nutrientConsumptionName, ${nutrient.scaledDimension}",
+      yAxisText: '$nutrientConsumptionName, ${nutrient.scaledDimension}',
       legendToggleSeriesVisibility: false,
       from: minimumDate,
       to: maximumDate,
@@ -84,7 +84,7 @@ class NutrientBarChart extends StatelessWidget {
         if (percent != null) {
           return _percentFormat.format(percent);
         }
-        return "";
+        return '';
       },
       pointColorMapper: (report, _) => _barColor(report),
       dataLabelSettings: DataLabelSettings(

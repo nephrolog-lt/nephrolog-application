@@ -236,7 +236,7 @@ class _LegalScreenContentState extends State<LegalScreenContent> {
         style: TextStyle(
             color: Theme.of(context).textTheme.bodyText1.color, fontSize: 16),
         children: [
-          TextSpan(text: "$text "),
+          TextSpan(text: '$text '),
           TextSpan(
             text: urlText,
             recognizer: TapGestureRecognizer()..onTap = () => launchPdf(url),

@@ -235,7 +235,7 @@ class IntakeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppListTile(
       title: Text(intake.product.name),
-      subtitle: Text(_getSubtitleParts(context).join(" | ")),
+      subtitle: Text(_getSubtitleParts(context).join(' | ')),
       leading: ProductKindIcon(productKind: intake.product.productKind),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -294,7 +294,7 @@ class IntakeExpandableTile extends StatelessWidget {
       selectedColor: Colors.blue,
       child: AppExpansionTile(
         title: Text(intake.product.name),
-        subtitle: Text(_getSubtitleParts(context).join(" | ")),
+        subtitle: Text(_getSubtitleParts(context).join(' | ')),
         onLongPress:
             allowLongClick ? () => _showLongClickDialog(context) : null,
         initiallyExpanded: initiallyExpanded,
@@ -745,7 +745,7 @@ class NutrientIntakeTile extends StatelessWidget {
 
     return [firstLine, _getConsumptionText(appLocalizations)]
         .where((t) => t != null && t.isNotEmpty)
-        .join("\n");
+        .join('\n');
   }
 }
 

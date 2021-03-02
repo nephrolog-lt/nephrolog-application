@@ -13,7 +13,7 @@ class DebugListCell extends StatelessWidget {
       builder: (context, firebaseToken) {
         return AppListTile(
           leading: const Icon(Icons.bug_report),
-          title: const Text("DEBUG"),
+          title: const Text('DEBUG'),
           onTap: () => _openDebugDialog(context, firebaseToken),
         );
       },
@@ -25,7 +25,7 @@ class DebugListCell extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("DEBUG"),
+          title: const Text('DEBUG'),
           content: SelectableText(firebaseToken),
         );
       },

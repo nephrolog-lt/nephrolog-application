@@ -237,7 +237,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
               ),
               labelText: appLocalizations.dialysisSolutionYellow,
               helperText: appLocalizations.dialysisSolutionYellowDescription,
-              suffixText: "ml",
+              suffixText: 'ml',
               textInputAction: TextInputAction.next,
               validator: _formValidators.numRangeValidator(1, 10000),
               initialValue: _requestBuilder.solutionYellowInMl != 0
@@ -251,7 +251,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
               ),
               labelText: appLocalizations.dialysisSolutionGreen,
               helperText: appLocalizations.dialysisSolutionGreenDescription,
-              suffixText: "ml",
+              suffixText: 'ml',
               textInputAction: TextInputAction.next,
               validator: _formValidators.numRangeValidator(1, 10000),
               initialValue: _requestBuilder.solutionGreenInMl != 0
@@ -265,7 +265,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
               ),
               labelText: appLocalizations.dialysisSolutionOrange,
               helperText: appLocalizations.dialysisSolutionOrangeDescription,
-              suffixText: "ml",
+              suffixText: 'ml',
               textInputAction: TextInputAction.next,
               validator: _formValidators.numRangeValidator(1, 10000),
               initialValue: _requestBuilder.solutionOrangeInMl != 0
@@ -279,7 +279,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
               ),
               labelText: appLocalizations.dialysisSolutionBlue,
               helperText: appLocalizations.dialysisSolutionBlueDescription,
-              suffixText: "ml",
+              suffixText: 'ml',
               textInputAction: TextInputAction.next,
               validator: _formValidators.numRangeValidator(1, 10000),
               initialValue: _requestBuilder.solutionBlueInMl != 0
@@ -293,7 +293,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
               ),
               labelText: appLocalizations.dialysisSolutionPurple,
               helperText: appLocalizations.dialysisSolutionPurpleDescription,
-              suffixText: "ml",
+              suffixText: 'ml',
               textInputAction: TextInputAction.next,
               validator: _formValidators.numRangeValidator(1, 10000),
               initialValue: _requestBuilder.solutionPurpleInMl != 0
@@ -316,7 +316,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
             AppIntegerFormField(
               labelText: appLocalizations.initialDraining,
               helperText: appLocalizations.initialDrainingHelper,
-              suffixText: "ml",
+              suffixText: 'ml',
               textInputAction: TextInputAction.next,
               validator: _formValidators.and(
                 _formValidators.nonNull(),
@@ -328,7 +328,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
             AppIntegerFormField(
               labelText: appLocalizations.totalDrainVolume,
               helperText: appLocalizations.totalDrainVolumeHelper,
-              suffixText: "ml",
+              suffixText: 'ml',
               textInputAction: TextInputAction.next,
               validator: _formValidators.and(
                 _formValidators.nonNull(),
@@ -340,7 +340,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
             AppIntegerFormField(
               labelText: appLocalizations.lastFill,
               helperText: appLocalizations.lastFillHelper,
-              suffixText: "ml",
+              suffixText: 'ml',
               textInputAction: TextInputAction.next,
               validator: _formValidators.and(
                 _formValidators.nonNull(),
@@ -352,7 +352,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
             AppIntegerFormField(
               labelText: appLocalizations.totalUltraFiltration,
               helperText: appLocalizations.totalUltraFiltrationHelper,
-              suffixText: "ml",
+              suffixText: 'ml',
               textInputAction: TextInputAction.next,
               validator: _formValidators.and(
                 _formValidators.nonNull(),
@@ -369,7 +369,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
             AppIntegerFormField(
               labelText: appLocalizations.additionalDrain,
               helperText: appLocalizations.additionalDrainHelper,
-              suffixText: "ml",
+              suffixText: 'ml',
               textInputAction: TextInputAction.next,
               validator: _formValidators.numRangeValidator(1, 10000),
               initialValue: _requestBuilder.additionalDrainMl,

@@ -187,7 +187,7 @@ class MonthlyNutritionSummarySection extends StatelessWidget {
     final appLocalizations = AppLocalizations.of(context);
     final monthFormatted = _monthFormat.format(DateTime.now());
 
-    final title = "$monthFormatted${appLocalizations.summary.toLowerCase()}"
+    final title = '$monthFormatted${appLocalizations.summary.toLowerCase()}'
         .capitalizeFirst();
     return LargeSection(
       title: Text(title),

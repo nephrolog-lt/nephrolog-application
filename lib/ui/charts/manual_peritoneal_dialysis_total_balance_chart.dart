@@ -25,7 +25,7 @@ class ManualPeritonealDialysisTotalBalanceChart extends StatelessWidget {
 
   Widget _getChart(BuildContext context) {
     return DateTimeNumericChart(
-      yAxisText: "${context.appLocalizations.dailyBalance}, ml",
+      yAxisText: '${context.appLocalizations.dailyBalance}, ml',
       from: minimumDate,
       to: maximumDate,
       decimalPlaces: 0,

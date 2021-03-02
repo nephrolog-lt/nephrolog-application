@@ -49,7 +49,7 @@ class DailyMealTypeConsumptionColumnSeries extends StatelessWidget {
       chartTitleText: _getTitleText(context.appLocalizations),
       primaryXAxis: CategoryAxis(),
       series: _getStackedColumnSeries(context).toList(),
-      yAxisText: "$consumptionName, $scaledDimension",
+      yAxisText: '$consumptionName, $scaledDimension',
       decimalPlaces: nutrient.decimalPlaces,
       showLegend: true,
     );

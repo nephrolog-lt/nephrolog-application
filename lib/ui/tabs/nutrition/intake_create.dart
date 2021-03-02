@@ -223,7 +223,7 @@ class _IntakeCreateScreenState extends State<IntakeCreateScreen> {
       (options) => options.fakeIntake.product.id == fakedIntake.product.id,
     );
 
-    assert(index != -1, "Unable to find intake between intakes for creation");
+    assert(index != -1, 'Unable to find intake between intakes for creation');
 
     return index;
   }

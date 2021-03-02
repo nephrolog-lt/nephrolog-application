@@ -20,7 +20,7 @@ class ManualPeritonealDialysisDayBalanceChart extends StatelessWidget {
     return NumericChart(
       primaryXAxis: CategoryAxis(),
       series: _getColumnSeries(context).toList(),
-      yAxisText: "${context.appLocalizations.balance}, ml",
+      yAxisText: '${context.appLocalizations.balance}, ml',
       decimalPlaces: 0,
       showLegend: false,
     );
