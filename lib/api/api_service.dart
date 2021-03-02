@@ -164,7 +164,7 @@ class ApiService {
 
   Future<DailyIntakesReportResponse> getDailyIntakesReport(LocalDate date) {
     return _nutritionApi
-        .nutritionDailyReportsRetrieve(_HackedOffsetDate(date).toString())
+        .nutritionDailyReportsRetrieve(_HackedOffsetDate(date))
         .then((r) => r.data)
         .catchError(
           (e) => null,
@@ -518,7 +518,7 @@ class ApiService {
       LocalDate date, AutomaticPeritonealDialysisRequest request) {
     return _peritonealDialysisApi
         .peritonealDialysisAutomaticDialysisUpdate(
-      _HackedOffsetDate(date).toString(),
+      _HackedOffsetDate(date),
       request,
     )
         .then(
@@ -532,9 +532,7 @@ class ApiService {
 
   Future<void> deleteAutomaticPeritonealDialysis(LocalDate date) {
     return _peritonealDialysisApi
-        .peritonealDialysisAutomaticDialysisDestroy(
-      _HackedOffsetDate(date).toString(),
-    )
+        .peritonealDialysisAutomaticDialysisDestroy(_HackedOffsetDate(date))
         .then(
       (r) {
         _postAppStateChangeEvent(_AppStateChangeEvent.healthStatus);
