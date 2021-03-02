@@ -40,7 +40,7 @@ dependencies:
   collection: ^1.14.13
   collection_ext: ^0.3.0
 
-  syncfusion_flutter_charts: 18.4.44+1
+  syncfusion_flutter_charts: 18.4.46
   syncfusion_flutter_xlsio: ^18.4.44-beta
   path_provider: ^1.6.27
   open_file: ^3.0.3
