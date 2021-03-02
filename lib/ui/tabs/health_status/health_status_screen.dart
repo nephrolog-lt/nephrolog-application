@@ -352,7 +352,7 @@ class DailyHealthStatusIndicatorMultiValueSectionWithTiles
 
   Iterable<Widget> _buildBloodPressureChildren(BuildContext context) {
     return dailyHealthStatus.bloodPressures
-        .sortedBy((e) => e.measuredAt.toInstant(), reverse: true)
+        .sortedBy((e) => e.measuredAt.localDateTime, reverse: true)
         .map(
       (b) {
         return _buildValueTile(
@@ -370,7 +370,7 @@ class DailyHealthStatusIndicatorMultiValueSectionWithTiles
 
   Iterable<Widget> _buildPulseChildren(BuildContext context) {
     return dailyHealthStatus.pulses
-        .sortedBy((e) => e.measuredAt.toInstant(), reverse: true)
+        .sortedBy((e) => e.measuredAt.localDateTime, reverse: true)
         .map(
       (p) {
         return _buildValueTile(

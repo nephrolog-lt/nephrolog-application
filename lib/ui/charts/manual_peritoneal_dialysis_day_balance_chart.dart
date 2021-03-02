@@ -28,7 +28,7 @@ class ManualPeritonealDialysisDayBalanceChart extends StatelessWidget {
 
   Iterable<XyDataSeries> _getColumnSeries(BuildContext context) sync* {
     final dialysis = manualPeritonealDialysis
-        .sortedBy((e) => e.startedAt.toInstant())
+        .sortedBy((e) => e.startedAt.localDateTime)
         .toList();
 
     yield BarSeries<ManualPeritonealDialysis, String>(

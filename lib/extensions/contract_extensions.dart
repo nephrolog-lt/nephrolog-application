@@ -4,6 +4,7 @@ import 'package:collection_ext/iterables.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nephrogo/extensions/collection_extensions.dart';
+import 'package:nephrogo/extensions/date_extensions.dart';
 import 'package:nephrogo/l10n/localizations.dart';
 import 'package:nephrogo/models/contract.dart';
 import 'package:nephrogo_api_client/model/appetite_enum.dart';
@@ -189,7 +190,7 @@ extension DailyIntakesReportExtensions on DailyIntakesReport {
   Iterable<Tuple2<MealTypeEnum, List<Intake>>>
       getIntakesGroupedByMealType() sync* {
     final sortedIntakes =
-        intakes.sortedBy((i) => i.consumedAt.toInstant(), reverse: true);
+        intakes.sortedBy((i) => i.consumedAt.localDateTime, reverse: true);
     final groups = sortedIntakes.groupBy((intake) => intake.mealType);
 
     final mealTypes = [
@@ -550,10 +551,10 @@ extension BloodPressureExtensions on BloodPressure {
   }
 
   String formatAmountWithoutDimensionWithTime(BuildContext context) {
-    final time =
-        TimeOfDay.fromDateTime(measuredAt.localDateTime.toDateTimeLocal())
-            .format(context);
-    return '$formattedAmountWithoutDimension ($time)';
+    final formattedTime =
+        measuredAt.localDateTime.clockTime.formatHoursAndMinutes();
+
+    return '$formattedAmountWithoutDimension ($formattedTime)';
   }
 }
 
@@ -572,9 +573,8 @@ extension PulseExtensions on Pulse {
   }
 
   String formatAmountWithoutDimensionWithTime(BuildContext context) {
-    final time = TimeOfDay.fromDateTime(
-      measuredAt.localDateTime.toDateTimeLocal(),
-    ).format(context);
+    final time = measuredAt.localDateTime.clockTime.formatHoursAndMinutes();
+
     return '$pulse ($time)';
   }
 }
@@ -654,10 +654,10 @@ extension DailyHealthStatusExtensions on DailyHealthStatus {
     switch (indicator) {
       case HealthIndicator.bloodPressure:
         final latestBloodPressure =
-            bloodPressures.maxBy((_, p) => p.measuredAt.toInstant());
+            bloodPressures.maxBy((_, p) => p.measuredAt.localDateTime);
         return '${latestBloodPressure.systolicBloodPressure} / ${latestBloodPressure.diastolicBloodPressure} mmHg';
       case HealthIndicator.pulse:
-        final latestPulse = pulses.maxBy((_, p) => p.measuredAt.toInstant());
+        final latestPulse = pulses.maxBy((_, p) => p.measuredAt.localDateTime);
         return '${latestPulse.pulse} ${appLocalizations.pulseDimension}';
       case HealthIndicator.weight:
         return '$weightKg kg';
@@ -767,7 +767,7 @@ extension DailyHealthStatusExtensions on DailyHealthStatus {
         throw ArgumentError(
             "Unable to get blood pressure indicator value. Please use different method");
       case HealthIndicator.pulse:
-        return pulses.maxBy((_, p) => p.measuredAt.toInstant()).pulse;
+        return pulses.maxBy((_, p) => p.measuredAt.localDateTime).pulse;
       case HealthIndicator.weight:
         return weightKg;
       case HealthIndicator.glucose:

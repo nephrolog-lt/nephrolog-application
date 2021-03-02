@@ -54,7 +54,7 @@ class HealthIndicatorBarChart extends StatelessWidget {
   List<XyDataSeries> _getBloodPressureSeries(BuildContext context) {
     final sortedBloodPressures = dailyHealthStatuses
         .expand((e) => e.bloodPressures)
-        .sortedBy((e) => e.measuredAt.toInstant())
+        .sortedBy((e) => e.measuredAt.localDateTime)
         .toList();
 
     return [
@@ -78,7 +78,7 @@ class HealthIndicatorBarChart extends StatelessWidget {
   List<XyDataSeries> _getPulseSeries(BuildContext context) {
     final sortedPulses = dailyHealthStatuses
         .expand((s) => s.pulses)
-        .sortedBy((e) => e.measuredAt.toInstant())
+        .sortedBy((e) => e.measuredAt.localDateTime)
         .toList();
 
     return [
