@@ -3,6 +3,14 @@ import 'package:time_machine/time_machine.dart';
 class DateUtils {
   DateUtils._();
 
+  static OffsetDateTime localNow() {
+    return Instant.now().inLocalZone().toOffsetDateTime();
+  }
+
+  static OffsetDateTime utcNow() {
+    return Instant.now().inUtc().toOffsetDateTime();
+  }
+
   static Iterable<LocalDate> generateDates(
     LocalDate startDate,
     LocalDate endDate,

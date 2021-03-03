@@ -10,6 +10,7 @@ import 'package:nephrogo/ui/forms/forms.dart';
 import 'package:nephrogo/ui/general/components.dart';
 import 'package:nephrogo/ui/general/dialogs.dart';
 import 'package:nephrogo/ui/tabs/nutrition/product_search.dart';
+import 'package:nephrogo/utils/date_utils.dart';
 import 'package:nephrogo/utils/form_utils.dart';
 import 'package:nephrogo_api_client/model/daily_nutrient_norms_with_totals.dart';
 import 'package:nephrogo_api_client/model/intake.dart';
@@ -79,7 +80,7 @@ class _IntakeCreateScreenState extends State<IntakeCreateScreen> {
 
   List<_IntakeSectionOption> _intakeSectionsOptions;
 
-  LocalDateTime _consumedAt;
+  OffsetDateTime _consumedAt;
 
   MealTypeEnum _mealType;
 
@@ -90,7 +91,7 @@ class _IntakeCreateScreenState extends State<IntakeCreateScreen> {
   void initState() {
     super.initState();
 
-    _consumedAt = LocalDateTime.now();
+    _consumedAt = DateUtils.utcNow();
     _mealType = widget.mealType;
 
     if (widget.initialDate != null) {
@@ -138,7 +139,7 @@ class _IntakeCreateScreenState extends State<IntakeCreateScreen> {
   Widget build(BuildContext context) {
     final formValidators = FormValidators(context);
     final title = _titleDateFormat
-        .format(_consumedAt.toDateTimeLocal())
+        .format(_consumedAt.localDateTime.toDateTimeLocal())
         .capitalizeFirst();
 
     return Scaffold(
@@ -252,7 +253,7 @@ class _IntakeCreateScreenState extends State<IntakeCreateScreen> {
       builder.productId = fakedIntake.product.id;
       builder.amountG = fakedIntake.amountG;
       builder.amountMl = fakedIntake.amountMl;
-      builder.consumedAt = _consumedAt.withOffset(Offset.zero);
+      builder.consumedAt = _consumedAt;
       builder.mealType = _mealType;
 
       yield builder.build();
@@ -326,7 +327,7 @@ class _IntakeEditSectionState extends State<_IntakeEditSection> {
 
   bool get isAmountInMilliliters => intake.product.densityGMl != null;
 
-  LocalDateTime get _consumedAt => intake.consumedAt.localDateTime;
+  OffsetDateTime get _consumedAt => intake.consumedAt;
 
   Product get _product => intake.product;
 

@@ -62,7 +62,7 @@ class _IntakeEditScreenState extends State<IntakeEditScreen> {
 
   Product get product => widget.intake.product;
 
-  LocalDateTime _consumedAt;
+  OffsetDateTime _consumedAt;
 
   bool get isAmountInMilliliters => product.densityGMl != null;
 
@@ -76,7 +76,7 @@ class _IntakeEditScreenState extends State<IntakeEditScreen> {
 
     _intakeBuilder.productId = product.id;
 
-    _consumedAt = widget.intake.consumedAt.localDateTime;
+    _consumedAt = widget.intake.consumedAt;
   }
 
   @override
@@ -172,8 +172,8 @@ class _IntakeEditScreenState extends State<IntakeEditScreen> {
                       onDateChanged: (date) {
                         _consumedAt = _consumedAt.adjustDate((_) => date);
                       },
-                      onDateSaved: (dt) => _intakeBuilder.consumedAt =
-                          _consumedAt.withOffset(Offset.zero),
+                      onDateSaved: (dt) =>
+                          _intakeBuilder.consumedAt = _consumedAt,
                       labelText: appLocalizations.date,
                     ),
                     MealTypeSelectionFormField(

@@ -96,7 +96,7 @@ extension ProductExtensions on Product {
   // This is used for generating intakes required to show nutrient amounts
   // after searching for a product
   Intake fakeIntake({
-    @required LocalDateTime consumedAt,
+    @required OffsetDateTime consumedAt,
     @required MealTypeEnum mealType,
     int amountG = 0,
     int amountMl,
@@ -106,7 +106,7 @@ extension ProductExtensions on Product {
     final builder = IntakeBuilder();
 
     builder.id = 0;
-    builder.consumedAt = consumedAt.withOffset(Offset.zero);
+    builder.consumedAt = consumedAt;
 
     builder.amountG = amountG;
 

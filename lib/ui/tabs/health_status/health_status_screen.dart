@@ -325,14 +325,14 @@ class DailyHealthStatusIndicatorMultiValueSectionWithTiles
   }
 
   Widget _buildValueTile({
-    @required LocalDateTime dateTime,
+    @required OffsetDateTime dateTime,
     @required String formattedAmount,
     @required GestureTapCallback onTap,
   }) {
     return AppListTile(
       title: Text(fullDateFormat
           .format(
-            dateTime.toDateTimeLocal(),
+        dateTime.localDateTime.toDateTimeLocal(),
           )
           .capitalizeFirst()),
       trailing: Row(
@@ -356,7 +356,7 @@ class DailyHealthStatusIndicatorMultiValueSectionWithTiles
         .map(
       (b) {
         return _buildValueTile(
-          dateTime: b.measuredAt.localDateTime,
+          dateTime: b.measuredAt,
           formattedAmount: b.formattedAmount,
           onTap: () => Navigator.pushNamed(
             context,
@@ -374,7 +374,7 @@ class DailyHealthStatusIndicatorMultiValueSectionWithTiles
         .map(
       (p) {
         return _buildValueTile(
-          dateTime: p.measuredAt.localDateTime,
+          dateTime: p.measuredAt,
           formattedAmount: p.formattedAmount(context.appLocalizations),
           onTap: () => Navigator.pushNamed(
             context,

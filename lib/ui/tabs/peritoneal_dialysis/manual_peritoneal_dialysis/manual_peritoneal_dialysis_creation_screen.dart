@@ -9,6 +9,7 @@ import 'package:nephrogo/ui/general/buttons.dart';
 import 'package:nephrogo/ui/general/components.dart';
 import 'package:nephrogo/ui/general/dialogs.dart';
 import 'package:nephrogo/ui/general/stepper.dart';
+import 'package:nephrogo/utils/date_utils.dart';
 import 'package:nephrogo/utils/form_utils.dart';
 import 'package:nephrogo_api_client/model/dialysate_color_enum.dart';
 import 'package:nephrogo_api_client/model/dialysis_solution_enum.dart';
@@ -42,7 +43,7 @@ class _ManualPeritonealDialysisCreationScreenState
   final _apiService = ApiService();
   final _dateFormat = DateFormat('MMM d');
 
-  final now = LocalDateTime.now();
+  final now = DateUtils.utcNow();
   final today = LocalDate.today();
   ManualPeritonealDialysisRequestBuilder _requestBuilder;
 
@@ -65,7 +66,7 @@ class _ManualPeritonealDialysisCreationScreenState
     _requestBuilder = widget.initialDialysis?.toRequestBuilder() ??
         ManualPeritonealDialysisRequestBuilder();
 
-    _requestBuilder.startedAt ??= now.withOffset(Offset.zero);
+    _requestBuilder.startedAt ??= now;
     _currentStep = _requestBuilder.isCompleted == false ? 1 : 0;
 
     _requestBuilder.isCompleted ??= false;
@@ -173,27 +174,36 @@ class _ManualPeritonealDialysisCreationScreenState
               children: [
                 Flexible(
                   child: AppDatePickerFormField(
-                    initialDate: _requestBuilder.startedAt.calendarDate,
-                    selectedDate: _requestBuilder.startedAt.calendarDate,
+                    initialDate:
+                        _requestBuilder.startedAt.localZoneCalendarDate,
+                    selectedDate:
+                        _requestBuilder.startedAt.localZoneCalendarDate,
                     firstDate: Constants.earliestDate,
                     lastDate: today,
                     dateFormat: _dateFormat,
                     validator: _formValidators.nonNull(),
                     onDateChanged: (date) {
-                      _requestBuilder.startedAt =
-                          _requestBuilder.startedAt.adjustDate((_) => date);
+                      _requestBuilder.startedAt = _requestBuilder.startedAt
+                          .adjustLocalZoneDate((_) => date);
                     },
                     labelText: appLocalizations.date,
                   ),
                 ),
                 Flexible(
                   child: AppTimePickerFormField(
-                    initialTime: _requestBuilder.startedAt.clockTime,
+                    initialTime:
+                        _requestBuilder.startedAt.toOffsetTimeInLocalZone(),
                     labelText: appLocalizations.mealCreationTime,
-                    onTimeChanged: (time) => _requestBuilder.startedAt =
-                        _requestBuilder.startedAt.adjustTime((_) => time),
-                    onTimeSaved: (time) => _requestBuilder.startedAt =
-                        _requestBuilder.startedAt.adjustTime((_) => time),
+                    onTimeChanged: (time) {
+                      _requestBuilder.startedAt = _requestBuilder.startedAt
+                          .adjustLocalZoneTime((_) => time);
+                    },
+                    onTimeSaved: (time) {
+                      _requestBuilder.startedAt = _requestBuilder.startedAt
+                          .adjustLocalZoneTime((_) => time)
+                          .inLocalZone
+                          .toOffsetDateTime();
+                    },
                   ),
                 ),
               ],
@@ -288,40 +298,40 @@ class _ManualPeritonealDialysisCreationScreenState
                 Flexible(
                   child: AppDatePickerFormField(
                     initialDate:
-                        _requestBuilder.finishedAt?.calendarDate ?? today,
+                        _requestBuilder.finishedAt?.localZoneCalendarDate ??
+                            today,
                     selectedDate:
-                        _requestBuilder.finishedAt?.calendarDate ?? today,
+                        _requestBuilder.finishedAt?.localZoneCalendarDate ??
+                            today,
                     firstDate: _requestBuilder.startedAt.calendarDate,
                     lastDate: today,
                     dateFormat: _dateFormat,
                     validator: _formValidators.nonNull(),
                     onDateChanged: (date) {
-                      _requestBuilder.finishedAt ??=
-                          now.withOffset(Offset.zero);
-                      _requestBuilder.finishedAt =
-                          _requestBuilder.finishedAt.adjustDate((_) => date);
+                      _requestBuilder.finishedAt ??= now;
+                      _requestBuilder.finishedAt = _requestBuilder.finishedAt
+                          .adjustLocalZoneDate((_) => date);
                     },
                     labelText: appLocalizations.date,
                   ),
                 ),
                 Flexible(
                   child: AppTimePickerFormField(
-                    initialTime:
-                        (_requestBuilder.finishedAt?.localDateTime ?? now)
-                            .clockTime,
+                    initialTime: (_requestBuilder.finishedAt ?? now)
+                        .toOffsetTimeInLocalZone(),
                     labelText: appLocalizations.mealCreationTime,
                     onTimeChanged: (time) {
-                      _requestBuilder.finishedAt ??=
-                          now.withOffset(Offset.zero);
+                      _requestBuilder.finishedAt ??= now;
 
-                      _requestBuilder.finishedAt.adjustTime((_) => time);
+                      _requestBuilder.finishedAt
+                          .adjustLocalZoneTime((_) => time);
                     },
                     onTimeSaved: (time) {
                       if (_isSecondStep) {
-                        _requestBuilder.finishedAt ??=
-                            now.withOffset(Offset.zero);
+                        _requestBuilder.finishedAt ??= now;
 
-                        _requestBuilder.finishedAt.adjustTime((_) => time);
+                        _requestBuilder.finishedAt
+                            .adjustLocalZoneTime((_) => time);
                       }
                     },
                   ),

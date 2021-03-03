@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -161,8 +162,7 @@ class AppSelectionScreenFormField<T> extends StatefulWidget {
       _AppSelectionScreenFormFieldState<T>();
 }
 
-class _AppSelectionScreenFormFieldState<T>
-    extends State<AppSelectionScreenFormField<T>> {
+class _AppSelectionScreenFormFieldState<T> extends State<AppSelectionScreenFormField<T>> {
   final TextEditingController _textEditingController = TextEditingController();
   T _selectedItem;
 
@@ -291,7 +291,7 @@ class _AppSelectFormFieldState<T> extends State<AppSelectFormField<T>> {
     }
 
     final initialSelection =
-        widget.items.firstWhere((e) => e.value == widget.initialValue);
+    widget.items.firstWhere((e) => e.value == widget.initialValue);
     if (initialSelection == null) {
       throw ArgumentError.value('initialValue',
           'Unable to find initial value in AppSelectFormField items');
@@ -349,8 +349,7 @@ class AppMultipleSelectFormField<T> extends StatefulWidget {
       _AppMultipleSelectFormFieldState<T>();
 }
 
-class _AppMultipleSelectFormFieldState<T>
-    extends State<AppMultipleSelectFormField<T>> {
+class _AppMultipleSelectFormFieldState<T> extends State<AppMultipleSelectFormField<T>> {
   List<AppSelectFormFieldItem<T>> _selectedItems;
 
   @override
@@ -499,7 +498,7 @@ class _AppDatePickerFormFieldState extends State<AppDatePickerFormField> {
 }
 
 class AppTimePickerFormField extends StatefulWidget {
-  final LocalTime initialTime;
+  final OffsetTime initialTime;
   final String labelText;
   final String helperText;
   final Widget prefixIcon;
@@ -524,9 +523,20 @@ class _AppTimePickerFormFieldState extends State<AppTimePickerFormField> {
   LocalTime _selectedTimeOfDay;
 
   @override
-  Widget build(BuildContext context) {
-    _selectedTimeOfDay = widget.initialTime;
+  void initState() {
+    super.initState();
 
+    assert(
+      widget.initialTime.offset != Offset.zero,
+      'Make sure to pass local time with offset non zero or change phone '
+      'time zone where offset is non zero',
+    );
+
+    _selectedTimeOfDay = widget.initialTime.clockTime;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return AppSelectionScreenFormField<LocalTime>(
       onTap: _onTap,
       itemToStringConverter: (newlySelectedTimeOfDay) {
@@ -537,7 +547,7 @@ class _AppTimePickerFormFieldState extends State<AppTimePickerFormField> {
       prefixIcon: widget.prefixIcon,
       onSaved: widget.onTimeSaved,
       onChanged: _onTimeChanged,
-      initialSelection: widget.initialTime,
+      initialSelection: _selectedTimeOfDay,
     );
   }
 
@@ -553,7 +563,7 @@ class _AppTimePickerFormFieldState extends State<AppTimePickerFormField> {
     final timeOfDay = await showTimePicker(
       context: context,
       initialTime:
-          TimeOfDay(hour: localTime.hourOfDay, minute: localTime.minuteOfHour),
+      TimeOfDay(hour: localTime.hourOfDay, minute: localTime.minuteOfHour),
     );
 
     if (timeOfDay == null) {
@@ -641,7 +651,7 @@ class AppIntegerFormField extends StatelessWidget {
 
 class AppDoubleInputField extends StatelessWidget {
   static final floatRegexPattern =
-      RegExp(r'^((0|([1-9][0-9]{0,3}))(\.|,)?\d*)$');
+  RegExp(r'^((0|([1-9][0-9]{0,3}))(\.|,)?\d*)$');
 
   final String labelText;
   final String helperText;

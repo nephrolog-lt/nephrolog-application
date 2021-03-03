@@ -5,6 +5,7 @@ import 'package:nephrogo/extensions/extensions.dart';
 import 'package:nephrogo/ui/forms/form_validators.dart';
 import 'package:nephrogo/ui/forms/forms.dart';
 import 'package:nephrogo/ui/general/components.dart';
+import 'package:nephrogo/utils/date_utils.dart';
 import 'package:nephrogo/utils/form_utils.dart';
 import 'package:nephrogo_api_client/model/blood_pressure.dart';
 import 'package:nephrogo_api_client/model/blood_pressure_request.dart';
@@ -37,8 +38,8 @@ class _BloodPressureAndPulseCreationScreenState
 
   final _apiService = ApiService();
 
-  LocalDateTime _now;
-  LocalDateTime _measuredAt;
+  OffsetDateTime _now;
+  OffsetDateTime _measuredAt;
   int _systolicBloodPressure;
   int _diastolicBloodPressure;
   int _pulse;
@@ -53,10 +54,10 @@ class _BloodPressureAndPulseCreationScreenState
   @override
   void initState() {
     super.initState();
-    _measuredAt = _now = LocalDateTime.now();
+    _measuredAt = _now = DateUtils.localNow();
 
     if (widget.initialDate != null) {
-      _measuredAt = widget.initialDate.at(_measuredAt.clockTime);
+      _measuredAt = _measuredAt.adjustDate((_) => widget.initialDate);
     }
   }
 
@@ -96,13 +97,13 @@ class _BloodPressureAndPulseCreationScreenState
                     ),
                     Flexible(
                       child: AppTimePickerFormField(
-                        initialTime: _measuredAt.clockTime,
+                        initialTime: _measuredAt.toOffsetTimeInLocalZone(),
                         labelText: appLocalizations.mealCreationTime,
                         onTimeChanged: (time) {
-                          _measuredAt.adjustTime((_) => time);
+                          _measuredAt.adjustLocalZoneTime((_) => time);
                         },
                         onTimeSaved: (time) {
-                          _measuredAt.adjustTime((_) => time);
+                          _measuredAt.adjustLocalZoneTime((_) => time);
                         },
                       ),
                     ),
@@ -190,7 +191,7 @@ class _BloodPressureAndPulseCreationScreenState
     final builder = BloodPressureRequestBuilder();
     builder.diastolicBloodPressure = _diastolicBloodPressure;
     builder.systolicBloodPressure = _systolicBloodPressure;
-    builder.measuredAt = _measuredAt.withOffset(Offset.zero);
+    builder.measuredAt = _measuredAt;
 
     final bloodPressureRequest = builder.build();
 
@@ -200,7 +201,7 @@ class _BloodPressureAndPulseCreationScreenState
   Future<Pulse> _savePulse() {
     final builder = PulseRequestBuilder();
     builder.pulse = _pulse;
-    builder.measuredAt = _measuredAt.withOffset(Offset.zero);
+    builder.measuredAt = _measuredAt;
 
     final pulseRequest = builder.build();
 

@@ -9,6 +9,7 @@ import 'package:nephrogo/ui/general/components.dart';
 import 'package:nephrogo/ui/general/dialogs.dart';
 import 'package:nephrogo/ui/general/stepper.dart';
 import 'package:nephrogo/ui/tabs/peritoneal_dialysis/peritoneal_dialysis_components.dart';
+import 'package:nephrogo/utils/date_utils.dart';
 import 'package:nephrogo/utils/form_utils.dart';
 import 'package:nephrogo_api_client/model/automatic_peritoneal_dialysis.dart';
 import 'package:nephrogo_api_client/model/automatic_peritoneal_dialysis_request.dart';
@@ -41,7 +42,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
 
   final _apiService = ApiService();
 
-  final now = LocalDateTime.now();
+  final now = DateUtils.utcNow();
   final today = LocalDate.today();
 
   AutomaticPeritonealDialysisRequestBuilder _requestBuilder;
@@ -61,7 +62,7 @@ class _AutomaticPeritonealDialysisCreationScreenState
     _requestBuilder = widget.initialDialysis?.toRequestBuilder() ??
         AutomaticPeritonealDialysisRequestBuilder();
 
-    _requestBuilder.startedAt ??= now.withOffset(Offset.zero);
+    _requestBuilder.startedAt ??= now;
     _currentStep = _requestBuilder.isCompleted == false ? 1 : 0;
 
     _requestBuilder.isCompleted ??= false;
@@ -216,12 +217,17 @@ class _AutomaticPeritonealDialysisCreationScreenState
                 Flexible(
                   flex: 2,
                   child: AppTimePickerFormField(
-                    initialTime: _requestBuilder.startedAt.clockTime,
+                    initialTime:
+                        _requestBuilder.startedAt.toOffsetTimeInLocalZone(),
                     labelText: appLocalizations.mealCreationTime,
-                    onTimeChanged: (time) => _requestBuilder.startedAt =
-                        _requestBuilder.startedAt.adjustTime((_) => time),
-                    onTimeSaved: (time) => _requestBuilder.startedAt =
-                        _requestBuilder.startedAt.adjustTime((_) => time),
+                    onTimeChanged: (time) {
+                      _requestBuilder.startedAt = _requestBuilder.startedAt
+                          .adjustLocalZoneTime((_) => time);
+                    },
+                    onTimeSaved: (time) {
+                      _requestBuilder.startedAt = _requestBuilder.startedAt
+                          .adjustLocalZoneTime((_) => time);
+                    },
                   ),
                 ),
               ],
@@ -429,23 +435,21 @@ class _AutomaticPeritonealDialysisCreationScreenState
                 Flexible(
                   flex: 2,
                   child: AppTimePickerFormField(
-                    initialTime:
-                        _requestBuilder.finishedAt?.clockTime ?? now.clockTime,
+                    initialTime: (_requestBuilder.finishedAt ?? now)
+                        .toOffsetTimeInLocalZone(),
                     labelText: appLocalizations.mealCreationTime,
                     onTimeChanged: (time) {
-                      _requestBuilder.finishedAt ??=
-                          now.withOffset(Offset.zero);
+                      _requestBuilder.finishedAt ??= now;
 
-                      _requestBuilder.finishedAt =
-                          _requestBuilder.finishedAt.adjustTime((_) => time);
+                      _requestBuilder.finishedAt = _requestBuilder.finishedAt
+                          .adjustLocalZoneTime((_) => time);
                     },
                     onTimeSaved: (time) {
                       if (_isSecondStep) {
-                        _requestBuilder.finishedAt ??=
-                            now.withOffset(Offset.zero);
+                        _requestBuilder.finishedAt ??= now;
 
-                        _requestBuilder.finishedAt =
-                            _requestBuilder.finishedAt.adjustTime((_) => time);
+                        _requestBuilder.finishedAt = _requestBuilder.finishedAt
+                            .adjustLocalZoneTime((_) => time);
                       }
                     },
                   ),
