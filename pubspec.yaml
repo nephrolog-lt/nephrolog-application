@@ -59,7 +59,7 @@ dependencies:
   dio_brotli_transformer: ^0.2.0
   dio_firebase_performance: ^0.3.0
 
-  flutter_linkify: ^4.1.0
+  flutter_linkify: ^5.0.0
   flutter_widget_from_html: ^0.5.2+1
 
   nephrogo_api_client:
