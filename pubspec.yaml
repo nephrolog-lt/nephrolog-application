@@ -48,7 +48,7 @@ dependencies:
   path_provider: ^1.6.27
   open_file: ^3.0.3
   table_calendar: ^2.3.3
-  share: ^0.6.5+4
+  share: ^2.0.0
 
   smooth_page_indicator: ^0.2.0
 
