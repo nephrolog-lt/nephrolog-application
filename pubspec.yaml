@@ -36,7 +36,7 @@ dependencies:
   tuple: ^1.0.3
   equatable: ^1.2.5
 
-  shared_preferences: 0.5.12+4
+  shared_preferences: 2.0.5
   url_launcher: ^5.7.10
 
   async: ^2.4.2
