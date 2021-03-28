@@ -33,7 +33,7 @@ dependencies:
 
   logging: ^0.11.4
   package_info: ^0.4.3+2
-  tuple: ^1.0.3
+  tuple: ^2.0.0
   equatable: ^1.2.5
 
   shared_preferences: 0.5.12+4
