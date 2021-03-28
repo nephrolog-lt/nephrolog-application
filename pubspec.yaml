@@ -82,7 +82,7 @@ dependencies:
   # https://firebase.flutter.dev/docs/migration
   firebase_core: ^0.7.0
   firebase_analytics: ^7.0.1
-  firebase_crashlytics: ^0.4.0+1
+  firebase_crashlytics: ^1.0.0
   firebase_messaging: ^8.0.0-dev.14
   firebase_performance: ^0.5.0+1
 
