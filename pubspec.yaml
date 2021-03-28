@@ -55,7 +55,7 @@ dependencies:
   scrollable_positioned_list: ^0.1.9
 
   dio: ^3.0.10
-  dio_http2_adapter: ^1.0.1
+  dio_http2_adapter: ^2.0.0
   dio_brotli_transformer: ^0.2.0
   dio_firebase_performance: ^0.3.0
 
